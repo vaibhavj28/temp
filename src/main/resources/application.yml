@@ -3,6 +3,10 @@ microapp:
 
 server:
   port: 9000
+  
+security:
+  session:
+    timeout: 5*3600*1000
 
 service:
   authnz-service:

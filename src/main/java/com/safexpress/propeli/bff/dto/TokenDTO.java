@@ -12,11 +12,13 @@ public class TokenDTO implements Serializable {
 	/**
 	 * 
 	 */
-	public TokenDTO(){}
-	
 	private static final long serialVersionUID = 5324794093142868374L;
 	private String accessToken;
 
+	public TokenDTO() {
+		
+	}
+	
 	public String getAccessToken() {
 		return accessToken;
 	}

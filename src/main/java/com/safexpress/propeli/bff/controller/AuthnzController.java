@@ -1,5 +1,8 @@
 package com.safexpress.propeli.bff.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -10,15 +13,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.safexpress.propeli.bff.dto.CredentialDTO;
-import com.safexpress.propeli.bff.dto.ResponseDTO;
+import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
+
 import com.safexpress.propeli.bff.dto.TokenDTO;
 import com.safexpress.propeli.bff.service.AuthnzService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 import io.swagger.annotations.Api;
@@ -43,17 +49,14 @@ public class AuthnzController {
 	private ModelMapper modelMapper;
 
 	@PostMapping("/v1/login")
-	ResponseEntity<ResponseDTO> login(@Valid DFHeader header, @RequestBody CredentialDTO credentialDTO, HttpServletResponse response){
+	public ResponseEntity<ResponseDTO> login(@Valid DFHeader header, @RequestBody CredentialDTO credentialDTO, HttpServletResponse response){
 		
 		TokenDTO tokenDTO =authnzService.getToken(header, credentialDTO);
-				
-		String token=tokenDTO.getAccessToken();
-		Cookie cookie = new Cookie("access-token", token);
-		cookie.setDomain("safexpress.com");
-		cookie.setHttpOnly(true);
-		cookie.setMaxAge(-1); // cookie should delete when browser is closed
-		cookie.setSecure(false); 
-		response.addCookie(cookie);	
+		if(tokenDTO !=null) {
+			String token=tokenDTO.getAccessToken();
+			response.addCookie(authnzService.createCookie(token));
+		}
+			
 		
 		ResponseDTO responseDTO= new ResponseDTO();
 		responseDTO.setMessage("Success");
@@ -61,9 +64,30 @@ public class AuthnzController {
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 	}
 	
-	@PostMapping("/v1/logout")
-	ResponseEntity<Void> logout(@Valid DFHeader header){	
+	@PostMapping("/secure/v1/logout")
+	public ResponseEntity<Void> logout(@Valid DFHeader header){	
 		authnzService.logout(header);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
+	
+	@GetMapping("/secure/v1/menu")
+	public ResponseEntity<ResponseDTO> getUserMenu(@Valid DFHeader header){	
+		
+		List<MenuHierarchyDTO> menu =authnzService.getUserMenu(header);
+		ResponseDTO responseDTO= new ResponseDTO();
+		responseDTO.setMessage("success");
+		responseDTO.setData(menu);
+		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	}
+	
+	@GetMapping("/secure/v1/permissions")
+	public ResponseEntity<ResponseDTO> getUserPermissions(@Valid DFHeader header){	
+		
+		Map<String, Object> permissions =authnzService.getAllPermissionsForUser(header);
+		ResponseDTO responseDTO= new ResponseDTO();
+		responseDTO.setMessage("success");
+		responseDTO.setData(permissions);
+		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	}
+	
 }

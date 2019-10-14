@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.LookUpDTO;
-import com.safexpress.propeli.bff.dto.ResponseDTO;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.bff.service.MdmService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 import io.swagger.annotations.Api;

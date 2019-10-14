@@ -1,9 +1,15 @@
 package com.safexpress.propeli.bff.service;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.safexpress.propeli.bff.configuration.Util;
 import com.safexpress.propeli.bff.dto.CredentialDTO;
-import com.safexpress.propeli.bff.dto.ResponseDTO;
+import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
 import com.safexpress.propeli.bff.dto.TokenDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
@@ -32,7 +38,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	String authnzServiceUrl;
 	
 	
-	
+	@Override
 	public TokenDTO getToken(DFHeader header, CredentialDTO credentialDTO) {
 		
 		String url= authnzServiceUrl + "/" + "login";
@@ -44,9 +50,26 @@ public class AuthnzServiceImpl implements AuthnzService {
 															HttpMethod.POST, 
 															httpEntity,
 															TokenDTO.class);		
+		if(responseEntity.getStatusCode().is2xxSuccessful()) {
+			return responseEntity.getBody();
+		}else {
+			return null;
+		}
 		
-		return responseEntity.getBody();
 	}
+
+	@Override
+	public Cookie createCookie(String token) {
+
+		Cookie cookie = new Cookie("access-token", token);
+		//cookie.setDomain("safexpress.com");
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setMaxAge(-1); // cookie should delete when browser is closed
+		cookie.setSecure(false); 
+		return cookie;
+	}
+	
 	public void logout(DFHeader header) {
 		
 		String url= authnzServiceUrl + "/" + "logout";
@@ -66,12 +89,36 @@ public class AuthnzServiceImpl implements AuthnzService {
 		
 	}
 	
-	public ResponseDTO getAllPermissionsForUser(DFHeader header) {
-		return null;
+	public Map<String, Object> getAllPermissionsForUser(DFHeader header) {
+		
+		String url= authnzServiceUrl + "/" + "permissions";
+		logger.debug("requesting resouce {}", url);
+		
+		HttpHeaders httpHeaders = Util.payload(header);
+		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
+		ResponseEntity<Map<String, Object>> responseEntity= restTemplate.exchange(url, 
+															HttpMethod.GET, 
+															httpEntity,
+															new ParameterizedTypeReference<Map<String,Object>>() {
+															});
+		
+		return responseEntity.getBody();
 	}
 	
-	public ResponseDTO getUserMenu(DFHeader dfHeader) {
-		return null;
+	public List<MenuHierarchyDTO> getUserMenu(DFHeader header) {
+		
+		String url= authnzServiceUrl + "/" + "menu";
+		logger.debug("requesting resouce {}", url);
+		
+		HttpHeaders httpHeaders = Util.payload(header);
+		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
+		ResponseEntity<List<MenuHierarchyDTO>> responseEntity= restTemplate.exchange(url, 
+															HttpMethod.GET, 
+															httpEntity,
+															new ParameterizedTypeReference<List<MenuHierarchyDTO>>() {
+															});
+		
+		return responseEntity.getBody();
 	}
 
 

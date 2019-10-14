@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.LookUpDTO;
-import com.safexpress.propeli.bff.dto.ResponseDTO;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.RolePermissionDTO;
+import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 public interface MdmService {

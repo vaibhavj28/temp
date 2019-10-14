@@ -18,9 +18,9 @@ import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.EntityDTO;
 import com.safexpress.propeli.bff.dto.LookUpDTO;
 import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
-import com.safexpress.propeli.bff.dto.ResponseDTO;
 import com.safexpress.propeli.bff.service.ObjectSerivce;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 import io.swagger.annotations.Api;

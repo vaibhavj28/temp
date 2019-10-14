@@ -1,21 +1,24 @@
 package com.safexpress.propeli.bff.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.Filter;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.web.client.RestTemplate;
 
-import com.safexpress.propeli.servicebase.annotation.SFXApi;
 
 /**
  * @author Arun Singh
- *@ClassType Configuration	
- *@Description Beans configuration for service
+ * @Email arusin06@in.ibm.com	
+ *
  */
 @Configuration
-@SFXApi
-public class AppConfiguration {
+public class AppConfi {
 
 	@Bean
 	public ModelMapper modelMapper() {
@@ -26,7 +29,7 @@ public class AppConfiguration {
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
-
+	
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertyConfig() {
 		return new PropertySourcesPlaceholderConfigurer();
