@@ -1,0 +1,23 @@
+microapp:
+  microId: common-bff
+
+server:
+  port: 9000
+
+service:
+  authnz-service:
+    url: localhost:7000/v1
+  MdmUserManagement:
+    mdm-url: http://10.1.233.78:9095/v1/mdm
+    #um-url: http://10.1.233.78:9095/v1/um
+    um-url: http://localhost:9095/v1/um
+
+        # Redis cache configuration
+app:           
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    password: ${REDIS_PASSWORD:admin}
+    port: ${REDIS_PORT:6379}
+ad:
+  service:
+    url: http://webs.safexpress.com:8081/SafeApi/webresources/sale_force_login 
