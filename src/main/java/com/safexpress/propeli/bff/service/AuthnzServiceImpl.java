@@ -17,11 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.safexpress.propeli.bff.configuration.Util;
 import com.safexpress.propeli.bff.dto.CredentialDTO;
 import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
 import com.safexpress.propeli.bff.dto.TokenDTO;
+import com.safexpress.propeli.security.util.AuthUtil;
 import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 /**
  * @author Ajay Singh Negi	
@@ -44,7 +45,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 		String url= authnzServiceUrl + "/" + "login";
 		logger.debug("requesting resouce {}", url);
 		
-		HttpHeaders httpHeaders = Util.payload(header);
+		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<CredentialDTO> httpEntity = new HttpEntity<>(credentialDTO,httpHeaders);
 		ResponseEntity<TokenDTO> responseEntity= restTemplate.exchange(url, 
 															HttpMethod.POST, 
@@ -75,7 +76,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 		String url= authnzServiceUrl + "/" + "logout";
 		logger.debug("requesting resouce {}", url);
 		
-		HttpHeaders httpHeaders = Util.payload(header);
+		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
 		ResponseEntity<Void> responseEntity= restTemplate.exchange(url, 
 															HttpMethod.POST, 
@@ -94,7 +95,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 		String url= authnzServiceUrl + "/" + "permissions";
 		logger.debug("requesting resouce {}", url);
 		
-		HttpHeaders httpHeaders = Util.payload(header);
+		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
 		ResponseEntity<Map<String, Object>> responseEntity= restTemplate.exchange(url, 
 															HttpMethod.GET, 
@@ -110,7 +111,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 		String url= authnzServiceUrl + "/" + "menu";
 		logger.debug("requesting resouce {}", url);
 		
-		HttpHeaders httpHeaders = Util.payload(header);
+		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
 		ResponseEntity<List<MenuHierarchyDTO>> responseEntity= restTemplate.exchange(url, 
 															HttpMethod.GET, 

@@ -3,10 +3,6 @@ microapp:
 
 server:
   port: 9000
-  
-security:
-  session:
-    timeout: 5*3600*1000
 
 service:
   authnz-service:
@@ -25,3 +21,7 @@ app:
 ad:
   service:
     url: http://webs.safexpress.com:8081/SafeApi/webresources/sale_force_login 
+# timeout in milliseconds
+security:
+  session:
+    timeout: 18000000

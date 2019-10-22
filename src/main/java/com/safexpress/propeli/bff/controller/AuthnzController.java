@@ -3,7 +3,6 @@ package com.safexpress.propeli.bff.controller;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.safexpress.propeli.bff.dto.CredentialDTO;
 import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
-
 import com.safexpress.propeli.bff.dto.TokenDTO;
 import com.safexpress.propeli.bff.service.AuthnzService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
@@ -45,9 +43,6 @@ public class AuthnzController {
 	@Autowired
 	private AuthnzService authnzService;
 	
-	@Autowired
-	private ModelMapper modelMapper;
-
 	@PostMapping("/v1/login")
 	public ResponseEntity<ResponseDTO> login(@Valid DFHeader header, @RequestBody CredentialDTO credentialDTO, HttpServletResponse response){
 		
