@@ -21,14 +21,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.safexpress.propeli.bff.configuration.Util;
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.LookUpDTO;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 @Service
 public class MdmServiceImpl implements MdmService {
@@ -45,7 +44,7 @@ public class MdmServiceImpl implements MdmService {
 	public List<RoleDTO> getAllRoles(DFHeader header) throws Exception {
 
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<RoleDTO>> response = restTemplate.exchange(new URI(url + "/roles/"), HttpMethod.GET,
 					entity, new ParameterizedTypeReference<List<RoleDTO>>() {
 					});
@@ -60,7 +59,7 @@ public class MdmServiceImpl implements MdmService {
 	public RolePermissionDTO getRolePermission(DFHeader header, long roleId) throws Exception {
 
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/permission/role/" + roleId), HttpMethod.GET, entity,
 					RolePermissionDTO.class).getBody();
 
@@ -73,7 +72,7 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public ResponseDTO addRolePermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
 		try {
-			HttpEntity<RoleDTO> entity = new HttpEntity<>(roleDetail.getRoleDto(), Util.payload(header));
+			HttpEntity<RoleDTO> entity = new HttpEntity<>(roleDetail.getRoleDto(), BaseUtil.payload(header));
 			ResponseDTO response = new ResponseDTO();
 			int status = 0;
 			String data = null;
@@ -101,7 +100,7 @@ public class MdmServiceImpl implements MdmService {
 	}
 	private int addPermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
 		try {
-		HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail,Util.payload(header));
+		HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail,BaseUtil.payload(header));
 		return restTemplate.exchange(new URI(url + "/role/permission"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
 		} catch (RestClientException e) {
 			log.error("Inside MdmServiceImpl :: addRolePermission() " + e.getMessage());
@@ -112,7 +111,7 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public List<LookUpDTO> lookupData(@Valid DFHeader header, String lokupType) {
 		try {
-			HttpEntity<Long> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("lokupType", lokupType);
 			URI uri = UriComponentsBuilder.fromUriString(url + "/lookUp/{lokupType}").buildAndExpand(params).toUri();
@@ -128,7 +127,7 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public List<BranchDTO> getAllBranch(DFHeader header) {
 		try {
-			HttpEntity<String> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<BranchDTO>> reponse = restTemplate.exchange(new URI(url + "/AllBranchDetails"),
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
 					});
@@ -141,7 +140,7 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public Integer editRolePermission(DFHeader header, RolePermissionDTO roleDetail) {
 		try {
-			HttpEntity<RolePermissionDTO> entity = new HttpEntity<>(roleDetail, Util.payload(header));
+			HttpEntity<RolePermissionDTO> entity = new HttpEntity<>(roleDetail, BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/role/permission"), HttpMethod.PUT, entity, Integer.class)
 					.getBody();
 			

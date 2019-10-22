@@ -21,12 +21,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.safexpress.propeli.bff.configuration.Util;
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.UserDTO;
 import com.safexpress.propeli.servicebase.exception.ValidationException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 
 @Service
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 	private String saveUser(DFHeader header, UserDTO newUser) throws Exception {
 		
 		try {
-			HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, Util.payload(header));
+			HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, BaseUtil.payload(header));
 			Map<String, String> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.POST, entity, Map.class).getBody();
 			return response.get("responseMessage");
 		} catch (RestClientResponseException e) {
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO getUser(DFHeader header, String userId) throws Exception {
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/users/" + userId), HttpMethod.GET, entity, UserDTO.class)
 					.getBody();
 
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<BranchDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception {
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<BranchDTO>> response = restTemplate.exchange(
 					new URI(url + "/users/" + userId + "/previlegeBranches"), HttpMethod.GET, entity,
 					new ParameterizedTypeReference<List<BranchDTO>>() {
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception {
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<RoleDTO>> response = restTemplate.exchange(new URI(url + "/users/" + userId + "/roles"),
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<RoleDTO>>() {
 					});
@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<UserDTO> getAllUsers(DFHeader header) throws Exception {
 		try {
-			HttpEntity<DFHeader> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<UserDTO>> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.GET,
 					entity, new ParameterizedTypeReference<List<UserDTO>>() {
 					});
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String updateUser(DFHeader header, UserDTO updatedUser) throws Exception {
 		try {
-			HttpEntity<UserDTO> entity = new HttpEntity<>(updatedUser, Util.payload(header));
+			HttpEntity<UserDTO> entity = new HttpEntity<>(updatedUser, BaseUtil.payload(header));
 			Map<String, String> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.PUT, entity, Map.class).getBody();
 			return response.get("responseMessage");
 
@@ -139,7 +139,7 @@ public class UserServiceImpl implements UserService {
 			List<BranchDTO> previlegeBranches) throws Exception {
 
 		try {
-			HttpEntity<Object> entity = new HttpEntity<>(previlegeBranches, Util.payload(header));
+			HttpEntity<Object> entity = new HttpEntity<>(previlegeBranches, BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<>();
 			params.put("userId", userId);
 			params.put("idKey", idKey);
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
 			throws Exception {
 
 		try {
-			HttpEntity<Object> entity = new HttpEntity<>(userRoles, Util.payload(header));
+			HttpEntity<Object> entity = new HttpEntity<>(userRoles, BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("userId", userId);
 			params.put("idKey", idKey);

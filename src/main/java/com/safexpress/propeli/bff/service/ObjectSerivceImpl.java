@@ -18,13 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.safexpress.propeli.bff.configuration.Util;
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.EntityDTO;
 import com.safexpress.propeli.bff.dto.LookUpDTO;
 import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 @Service
 public class ObjectSerivceImpl implements ObjectSerivce {
@@ -38,7 +37,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public ModuleObjectDTO saveObject(DFHeader header, ModuleObjectDTO moduleObject) throws Exception {
 		try {
-			HttpEntity<ModuleObjectDTO> entity = new HttpEntity<>(moduleObject, Util.payload(header));
+			HttpEntity<ModuleObjectDTO> entity = new HttpEntity<>(moduleObject, BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/object"), HttpMethod.POST, entity, ModuleObjectDTO.class).getBody();
 		} catch (RestClientException | URISyntaxException e) {
 			throw new RuntimeException(e.getMessage());
@@ -48,7 +47,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public List<ModuleObjectDTO> getAllObject(DFHeader header) throws Exception {
 		try {
-			HttpEntity<String> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<ModuleObjectDTO>> reponse = restTemplate.exchange(new URI(url + "/object"),
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
 					});
@@ -61,7 +60,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public Integer updateObject(DFHeader header, ModuleObjectDTO moduleObject) throws Exception {
 		try {
-			HttpEntity<ModuleObjectDTO> entity = new HttpEntity<>(moduleObject, Util.payload(header));
+			HttpEntity<ModuleObjectDTO> entity = new HttpEntity<>(moduleObject, BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/object"), HttpMethod.PUT, entity, Integer.class).getBody();
 		} catch (RestClientException | URISyntaxException e) {
 			throw new RuntimeException(e.getMessage());
@@ -71,7 +70,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public ModuleObjectDTO getObjectById(DFHeader header, String objectId) throws Exception {
 		try {
-			HttpEntity<Long> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("objectId", objectId);
 			URI uri = UriComponentsBuilder.fromUriString(url + "/object/byId/{objectId}").buildAndExpand(params)
@@ -85,7 +84,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public List<ModuleObjectDTO> getObjectByName(DFHeader header, String objectName) throws Exception {
 		try {
-			HttpEntity<Long> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("objectName", objectName);
 			URI uri = UriComponentsBuilder.fromUriString(url + "/object/byName/{objectName}").buildAndExpand(params)
@@ -102,7 +101,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public List<EntityDTO> getSectionList(DFHeader header, long menuId) throws Exception {
 		try {
-			HttpEntity<Long> entity = new HttpEntity<>(Util.payload(header));
+			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, Long> params = new HashMap<String, Long>();
 			params.put("menuId", menuId);
 			URI uri = UriComponentsBuilder.fromUriString(url + "/sectionList/{menuId}").buildAndExpand(params).toUri();
@@ -118,7 +117,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public int saveSection(DFHeader header, EntityDTO entityDto) throws Exception {
 		try {
-			HttpEntity<EntityDTO> entity = new HttpEntity<>(entityDto, Util.payload(header));
+			HttpEntity<EntityDTO> entity = new HttpEntity<>(entityDto, BaseUtil.payload(header));
 			return restTemplate.exchange(new URI(url + "/section"), HttpMethod.POST, entity, Integer.class).getBody();
 		} catch (RestClientException | URISyntaxException e) {
 			throw new RuntimeException(e.getMessage());
