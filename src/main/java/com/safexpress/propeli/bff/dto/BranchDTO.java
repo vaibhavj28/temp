@@ -1,21 +1,29 @@
 package com.safexpress.propeli.bff.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.springframework.stereotype.Component;
 
+@Component
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BranchDTO implements Serializable {
 	private static final long serialVersionUID = 316332571995776L;
 	
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_ABSENT)
+	@JsonIgnore
 	private Long branchId;
 	@JsonInclude(Include.NON_NULL)
-	private long parentBranchId;
+	@JsonIgnore
+	private Long parentBranchId;
 	@NotNull(message = "branchCode cannot be null")
 	private String branchCode;
 	private String parentBranchCode;
@@ -26,9 +34,28 @@ public class BranchDTO implements Serializable {
 	private String email;
 	@JsonInclude(Include.NON_NULL)
 	private String addOrRemove;
+	@JsonInclude(Include.NON_NULL)
 	private int isDefault;
-	
-	
+	@JsonInclude(Include.NON_NULL)
+	private String address;
+	@JsonInclude(Include.NON_NULL)
+	private int cutoffTime;
+	@JsonInclude(Include.NON_NULL)
+	private int organisationId;
+	@JsonInclude(Include.NON_NULL)
+	private int branchtypeId;
+	@JsonInclude(Include.NON_NULL)
+	private int autogenWaybl;
+	@JsonInclude(Include.NON_NULL)
+	private String branchRating;
+	@JsonInclude(Include.NON_NULL)
+	private int lagTime;
+	@JsonInclude(Include.NON_NULL)
+	private String descr;
+	@JsonInclude(Include.NON_NULL)
+	private int status;
+	private Date expiryDate;
+	private Date effectiveDate;
 	public long getBranchId() {
 		return branchId;
 	}
@@ -88,6 +115,101 @@ public class BranchDTO implements Serializable {
 	}
 	public void setIsDefault(int isDefault) {
 		this.isDefault = isDefault;
-	}	
-		
+	}
+
+	public void setBranchId(Long branchId) {
+		this.branchId = branchId;
+	}
+
+	public void setParentBranchId(Long parentBranchId) {
+		this.parentBranchId = parentBranchId;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public int getCutoffTime() {
+		return cutoffTime;
+	}
+
+	public void setCutoffTime(int cutoffTime) {
+		this.cutoffTime = cutoffTime;
+	}
+
+	public int getOrganisationId() {
+		return organisationId;
+	}
+
+	public void setOrganisationId(int organisationId) {
+		this.organisationId = organisationId;
+	}
+
+	public int getBranchtypeId() {
+		return branchtypeId;
+	}
+
+	public void setBranchtypeId(int branchtypeId) {
+		this.branchtypeId = branchtypeId;
+	}
+
+	public int getAutogenWaybl() {
+		return autogenWaybl;
+	}
+
+	public void setAutogenWaybl(int autogenWaybl) {
+		this.autogenWaybl = autogenWaybl;
+	}
+
+	public String getBranchRating() {
+		return branchRating;
+	}
+
+	public void setBranchRating(String branchRating) {
+		this.branchRating = branchRating;
+	}
+
+	public int getLagTime() {
+		return lagTime;
+	}
+
+	public void setLagTime(int lagTime) {
+		this.lagTime = lagTime;
+	}
+
+	public String getDescr() {
+		return descr;
+	}
+
+	public void setDescr(String descr) {
+		this.descr = descr;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
+	public Date getEffectiveDate() {
+		return effectiveDate;
+	}
+
+	public void setEffectiveDate(Date effectiveDate) {
+		this.effectiveDate = effectiveDate;
+	}
 }

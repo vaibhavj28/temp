@@ -2,12 +2,14 @@ package com.safexpress.propeli.bff.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.safexpress.propeli.bff.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.LookUpDTO;
-import com.safexpress.propeli.bff.dto.RoleDTO;
-import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 import com.safexpress.propeli.servicebase.util.BaseUtil;
@@ -35,33 +33,48 @@ public class MdmServiceImpl implements MdmService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Value("${service.MdmUserManagement.mdm-url}")
-	private String url;
+	@Value("${service.lookUpNotepadCommandmentService.look_up_url}")
+	private String lookUpUrl;
 
-	private static final Logger log = LoggerFactory.getLogger(MdmServiceImpl.class);
+	@Value("${service.mdmUserManagement.roles_url}")
+	private String rolesUrl;
+
+	@Value("${service.mdmUserManagement.objects_url}")
+	private String objectUrl;
+
+	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	@Autowired
+	private Response response;
 
 	@Override
-	public List<RoleDTO> getAllRoles(DFHeader header) throws Exception {
-
+	public Response<RoleDTO> getAllRoles(DFHeader header) throws Exception {
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<RoleDTO>> response = restTemplate.exchange(new URI(url + "/roles/"), HttpMethod.GET,
+			ResponseEntity<List<RoleDTO>> roles = restTemplate.exchange(new URI(rolesUrl), HttpMethod.GET,
 					entity, new ParameterizedTypeReference<List<RoleDTO>>() {
 					});
-			return response.getBody();
+			response.setData(roles.getBody());
+			response.setMessage("success");
+			return response;
 		} catch (RestClientException | URISyntaxException e) {
-			log.error("Inside MdmServiceImpl :: getAllRoles() " + e.getMessage());
+			log.error("Inside MdmServiceImpl :: getAllRoles() ", e);
 			throw e;
 		}
 	}
 
 	@Override
-	public RolePermissionDTO getRolePermission(DFHeader header, long roleId) throws Exception {
+	public Response<RolePermissionDTO> getRolePermission(DFHeader header, long roleId) throws Exception {
 
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			return restTemplate.exchange(new URI(url + "/permission/role/" + roleId), HttpMethod.GET, entity,
-					RolePermissionDTO.class).getBody();
+			ResponseEntity<RolePermissionDTO> rolePermissionDTO = restTemplate.exchange(new URI(rolesUrl + "permissions/" + roleId), HttpMethod.GET, entity,
+					RolePermissionDTO.class);
+			List<RolePermissionDTO> rolePermission = new ArrayList<>();
+			rolePermission.add(rolePermissionDTO.getBody());
+			response.setData(rolePermission);
+			response.setMessage("success");
+			return  response;
 
 		} catch (RestClientException | URISyntaxException e) {
 			log.error("Inside MdmServiceImpl :: getRolePermission() " + e.getMessage());
@@ -76,7 +89,7 @@ public class MdmServiceImpl implements MdmService {
 			ResponseDTO response = new ResponseDTO();
 			int status = 0;
 			String data = null;
-			RoleDTO role = restTemplate.exchange(new URI(url + "/roles"), HttpMethod.POST, entity, RoleDTO.class)
+			RoleDTO role = restTemplate.exchange(new URI(rolesUrl), HttpMethod.POST, entity, RoleDTO.class)
 					.getBody();
 			if (role.getRoleId() != 0) {
 				status = 1;
@@ -98,50 +111,63 @@ public class MdmServiceImpl implements MdmService {
 			throw e;
 		}
 	}
+
+	/**
+	 *
+	 * @param header DFHeader
+	 * @param roleDetail RolePermissionDTO
+	 * @return int
+	 * @throws Exception exception
+	 */
 	private int addPermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
 		try {
 		HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail,BaseUtil.payload(header));
-		return restTemplate.exchange(new URI(url + "/role/permission"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
+		return restTemplate.exchange(new URI(rolesUrl + "permissions"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
 		} catch (RestClientException e) {
 			log.error("Inside MdmServiceImpl :: addRolePermission() " + e.getMessage());
 			return 0;
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param header DFHeader
+	 * @param lookupType String
+	 * @return  Response<LookUpDTO>
+	 */
 	@Override
-	public List<LookUpDTO> lookupData(@Valid DFHeader header, String lokupType) {
+	public Response<LookUpDTO> lookupData(@Valid DFHeader header, String lookupType) {
 		try {
 			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
-			params.put("lokupType", lokupType);
-			URI uri = UriComponentsBuilder.fromUriString(url + "/lookUp/{lokupType}").buildAndExpand(params).toUri();
-			return restTemplate
-					.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpDTO>>() {
-					}).getBody();
+			params.put("lookupType", lookupType);
+			URI uri = UriComponentsBuilder.fromUriString(lookUpUrl + "/lookUpValueByLookUpType/{lookupType}").buildAndExpand(params).toUri();
+			ResponseEntity<List<LookUpDTO>> lookUpDTOs=restTemplate.exchange(uri, HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<LookUpDTO>>() {
+					});
+			response.setData(lookUpDTOs.getBody());
+			response.setMessage("success");
+			return response;
+
+
 
 		} catch (RestClientException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
 
-	@Override
-	public List<BranchDTO> getAllBranch(DFHeader header) {
-		try {
-			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<BranchDTO>> reponse = restTemplate.exchange(new URI(url + "/AllBranchDetails"),
-					HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
-					});
-			return reponse.getBody();
-		} catch (RestClientException | URISyntaxException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-	}
 
+	/**
+	 *
+	 * @param header DFHeader
+	 * @param roleDetail RolePermissionDTO
+	 * @return Integer
+	 */
 	@Override
 	public Integer editRolePermission(DFHeader header, RolePermissionDTO roleDetail) {
 		try {
 			HttpEntity<RolePermissionDTO> entity = new HttpEntity<>(roleDetail, BaseUtil.payload(header));
-			return restTemplate.exchange(new URI(url + "/role/permission"), HttpMethod.PUT, entity, Integer.class)
+			return restTemplate.exchange(new URI(rolesUrl + "/permissions"), HttpMethod.PUT, entity, Integer.class)
 					.getBody();
 			
 		} catch (RestClientException | URISyntaxException e) {
@@ -150,4 +176,26 @@ public class MdmServiceImpl implements MdmService {
 
 	}
 
+	/**
+	 *
+	 * @param header DFHeader
+	 * @return Response<MenuHierarchyDTO>
+	 * @throws Exception exception
+	 */
+	@Override
+	public Response<MenuHierarchyDTO> getMenuHierarchy(DFHeader header) throws Exception {
+
+		try {
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			ResponseEntity<List<MenuHierarchyDTO>> menuHierarchyDTOs = restTemplate.exchange(new URI( objectUrl+ "menuHierarchies"), HttpMethod.GET,
+					entity, new ParameterizedTypeReference<List<MenuHierarchyDTO>>() {
+					});
+			response.setData(menuHierarchyDTOs.getBody());
+			response.setMessage("success");
+			return response;
+		} catch (RestClientException | URISyntaxException e) {
+			log.error("Inside MdmServiceImpl :: getMenuHierarchy() " + e.getMessage());
+			throw e;
+		}
+	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.safexpress.propeli.bff.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.UserDTO;
@@ -45,7 +45,7 @@ public class UserController {
 	public ResponseEntity<ResponseDTO> createUser(@Valid DFHeader header,
 			@ApiParam(value = "User data to be inserted", required = true) @Valid @RequestBody UserDTO newUser) throws Exception {
 		
-		String responseStatus = service.addUser(header, newUser);
+		String responseStatus = service.saveUser(header, newUser);
 		ResponseDTO responseDTO = new ResponseDTO();
 		responseDTO.setMessage("success");
 		responseDTO.setData(responseStatus);
@@ -54,49 +54,45 @@ public class UserController {
 
 	@ApiOperation(value = "Fetches all Users")
 	@GetMapping("users")
-	public ResponseEntity<ResponseDTO> getAllUsers(@Valid DFHeader header) throws Exception {
-		
+	public ResponseEntity<ResponseDTO<UserDTO>> getAllUsers(@Valid DFHeader header) throws Exception {
+
 		List<UserDTO> users = service.getAllUsers(header);
 		ResponseDTO responseDTO = new ResponseDTO();
 		responseDTO.setMessage("success");
 		responseDTO.setData(users);
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-		
+
 	}
 
 	@ApiOperation(value = "Fetches an User")
 	@GetMapping("users/{uid}")
-	public ResponseEntity<ResponseDTO> getUser(@Valid DFHeader header,
-			@ApiParam(value = "user id for which user has to be retrieved from database", required = true) @PathVariable("uid") String userId) throws Exception {
-		
-		UserDTO user = service.getUser(header, userId);
-		ResponseDTO responseDTO = new ResponseDTO();
-		responseDTO.setMessage("success");
-		responseDTO.setData(user);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	public ResponseEntity<Response<UserDTO>> getUser(@Valid DFHeader header,
+											@ApiParam(value = "user id for which user has to be retrieved from database", required = true) @PathVariable("uid") String userId) throws Exception {
+
+		Response user = service.getUser(header, userId);
+		user.setMessage("success");
+
+		return ResponseEntity.status(HttpStatus.OK).body(user);
 	}
 
 	@ApiOperation(value = "Fetches the list of previlege branches for an User")
 	@GetMapping("users/{uid}/previlegeBranches")
-	public ResponseEntity<ResponseDTO> getUserPrevilegeBranches(@Valid DFHeader header,
+	public ResponseEntity<Response<BranchDTO>> getUserPrevilegeBranches(@Valid DFHeader header,
 			@ApiParam(value = "user id for which previlege branches have to be retrieved from database", required = true) @PathVariable("uid") String userId) throws Exception {
-		List<BranchDTO> userPrevilegeBranches = service.getPrevilegeBranches(header, userId);
-		ResponseDTO responseDTO = new ResponseDTO();
-		responseDTO.setMessage("success");
-		responseDTO.setData(userPrevilegeBranches);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+		Response<BranchDTO> response = service.getPrevilegeBranches(header, userId);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@ApiOperation(value = "Fetches the list of roles for an User")
 	@GetMapping("users/{uid}/roles")
-	public ResponseEntity<ResponseDTO> getUserRoles(@Valid DFHeader header,
+	public ResponseEntity<Response<RoleDTO>> getUserRoles(@Valid DFHeader header,
 			@ApiParam(value = "user id for which roles have to be retrieved from database", required = true) @PathVariable("uid") String userId) throws Exception {
 		
-		List<RoleDTO> userRoles = service.getUserRoles(header, userId);
-		ResponseDTO responseDTO = new ResponseDTO();
+		Response<RoleDTO> response = service.getUserRoles(header, userId);
+		/*ResponseDTO responseDTO = new ResponseDTO();
 		responseDTO.setMessage("success");
-		responseDTO.setData(userRoles);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+		responseDTO.setData(userRoles);*/
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@ApiOperation(value = "Updates an User")

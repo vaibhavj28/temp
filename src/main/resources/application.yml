@@ -2,17 +2,43 @@ microapp:
   microId: common-bff
 
 server:
-  port: 9000
+  port: 9091
 
+# Core Services url
 service:
-  authnz-service:
-    url: localhost:7000/v1
-  MdmUserManagement:
-    mdm-url: http://10.1.233.78:9095/v1/mdm
-    #um-url: http://10.1.233.78:9095/v1/um
-    um-url: http://localhost:9095/v1/um
+  authnz:
+    host: ${AUTHNZ_HOST:127.0.0.1}
+    port: ${AUTHNZ_PORT:7000}  
+    uri: /v1  
+     
+  mdmUserManagement:
+     protocol: http://
+     host: ${USER_MANAGEMENT_HOST:127.0.0.1}
+     port: ${USER_MANAGEMENT_PORT::9095}
+     objects_uri: /v1/objects/
+     users_uri: /v1/users/
+     roles_uri: /v1/roles/
+     uri : /v1
+     users_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.users_uri}
+     objects_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.objects_uri}
+     roles_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.roles_uri}
+     mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.uri}
+
+  lookUpNotepadCommandmentService:
+      host: ${USER_MANAGEMENT_HOST:127.0.0.1}
+      port: ${USER_MANAGEMENT_PORT::9096}
+      lookUp_uri: /v1/mdm/
+      notePad_uri: /v1/mdm/notepad/
+      look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.lookUp_uri}
+      notepad_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.notePad_uri}
+  branchService:
+      host: ${USER_MANAGEMENT_HOST:127.0.0.1}
+      port: ${USER_MANAGEMENT_PORT::9001}
+      branch_uri: /v1/branches/
+      branch_url: ${service.mdmUserManagement.protocol}${service.branchService.host}${service.branchService.port}${service.branchService.branch_uri}
 
         # Redis cache configuration
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 app:           
   redis:
     host: ${REDIS_HOST:127.0.0.1}
@@ -21,7 +47,11 @@ app:
 ad:
   service:
     url: http://webs.safexpress.com:8081/SafeApi/webresources/sale_force_login 
+    
 # timeout in milliseconds
 security:
   session:
     timeout: 18000000
+
+message:
+  success: Success

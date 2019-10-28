@@ -3,6 +3,7 @@ package com.safexpress.propeli.bff.service;
 import java.util.List;
 
 import com.safexpress.propeli.bff.dto.BranchDTO;
+import com.safexpress.propeli.bff.dto.Response;
 import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.UserDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
@@ -14,13 +15,13 @@ import com.safexpress.propeli.servicebase.model.DFHeader;
 
 public interface UserService {
 
-	String addUser(DFHeader header, UserDTO newUser) throws Exception;
+	String saveUser(DFHeader header, UserDTO newUser) throws Exception;
 
-	UserDTO getUser(DFHeader header, String userId) throws Exception;
+	Response<UserDTO> getUser(DFHeader header, String userId) throws Exception;
 
-	List<BranchDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception;
+	Response<BranchDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception;
 
-	List<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception;
+	Response<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception;
 
 	List<UserDTO> getAllUsers(DFHeader header) throws Exception;
 

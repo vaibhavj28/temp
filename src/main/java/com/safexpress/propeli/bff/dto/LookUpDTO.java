@@ -6,7 +6,9 @@ public class LookUpDTO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private long id;
-	private String lookUpValue;
+	private String lookupVal;
+	private int lookupTypeId;
+	private String status;
 	
 	public LookUpDTO(){}
 	/**
@@ -15,7 +17,7 @@ public class LookUpDTO implements Serializable {
 	 */
 	public LookUpDTO(long id, String lookUpValue) {
 		this.id = id;
-		this.lookUpValue = lookUpValue;
+		this.lookupVal = lookUpValue;
 	}
 	/**
 	 * @return the id
@@ -32,15 +34,29 @@ public class LookUpDTO implements Serializable {
 	/**
 	 * @return the lookUpValue
 	 */
-	public String getLookUpValue() {
-		return lookUpValue;
+	public String getLookupVal() {
+		return lookupVal;
 	}
 	/**
-	 * @param lookUpValue the lookUpValue to set
+	 * @param lookupVal the lookUpValue to set
 	 */
-	public void setLookUpValue(String lookUpValue) {
-		this.lookUpValue = lookUpValue;
+	public void setLookupVal(String lookupVal) {
+		this.lookupVal = lookupVal;
 	}
-	
 
+	public int getLookupTypeId() {
+		return lookupTypeId;
+	}
+
+	public void setLookupTypeId(int lookupTypeId) {
+		this.lookupTypeId = lookupTypeId;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }

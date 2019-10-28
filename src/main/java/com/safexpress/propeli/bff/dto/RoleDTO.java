@@ -1,35 +1,48 @@
 package com.safexpress.propeli.bff.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 public class RoleDTO implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3170771691990515776L;
 	
+	@ApiModelProperty(value="Role Table Key", notes="Required in case of role update or search")
 	@JsonInclude(Include.NON_NULL)
 	private long roleId;	
-	@NotNull
+	@ApiModelProperty(value = "Role Name", notes = "Name must be in characters")
+	@NotEmpty(message = "Role Name cannot be null or empty")
+	@Size(max = 50, message = "Role Name must be below 50 characters long") 
 	private String roleName;
-	private String description;
-	private int status;
-	private String createdBy;
-	private String updatedBy;
+	@ApiModelProperty(value="Role Description")
 	@JsonInclude(Include.NON_NULL)
+	@Size(max = 100, message = "Description must be below 100 characters long") 
+	private String description;
+	@ApiModelProperty(value="Role Status", notes = "1 means active and 0 means not active")
+	@NotNull(message = "Status cannot be null")
+	private int status;
+	@JsonInclude(Include.NON_NULL)
+	private String createdBy;
+	@JsonInclude(Include.NON_NULL)
+	private String updatedBy;
+	@ApiModelProperty(value="Flag to specify if the branch is to be added or removed ", notes = "Specify 'add' for addition and 'remove' for removal")
+	@JsonInclude(Include.NON_NULL)	
 	String addOrRemoveOrUpdate;
+	@JsonInclude(Include.NON_NULL)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp effectiveDate;
+	@JsonInclude(Include.NON_NULL)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp expiryDate;
 	
 	
-	// int channeId;
-
 	public String getCreatedBy() {
 		return createdBy;
 	}

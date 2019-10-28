@@ -1,10 +1,12 @@
 package com.safexpress.propeli.bff.service;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.safexpress.propeli.bff.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +16,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.RoleDTO;
-import com.safexpress.propeli.bff.dto.UserDTO;
-import com.safexpress.propeli.servicebase.exception.ValidationException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 import com.safexpress.propeli.servicebase.util.BaseUtil;
 
@@ -35,11 +30,61 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Value("${service.MdmUserManagement.um-url}")
+/**	@Value("${service.MdmUserManagement.um-url}")
 	private String url;
+
+	@Value("${service.MdmUserManagement.mdm-url}")
+	private String mdmUrl;
+
+	@Value("${service.MdmUserManagement.mdm-branch-url}")
+	private String mdmBranchUrl;
+	**/
+		
+	@Value("${service.mdmUserManagement.host}")
+	String host;
+	
+	@Value("${service.mdmUserManagement.port}")
+	String port;
+	
+	@Value("${service.mdmUserManagement.users_uri}")
+	String uri;
+
+	@Value("${service.lookUpNotepadCommandmentService.port}")
+	String lookUpNotePadCommandmentPort;
+
+	@Value("${service.branchService.port}")
+	String branchPort;
+
+	@Value("${service.lookUpNotepadCommandmentService.lookUp_uri}")
+	String lookUpUri;
+
+	@Value("${service.lookUpNotepadCommandmentService.notePad_uri}")
+	String notePadUri;
+
+	@Value("${service.branchService.branch_uri}")
+	String branchUri;
+
+	@Value("${service.branchService.branch_url}")
+	String branchUrl;
+
+	@Value("${service.mdmUserManagement.protocol}")
+	String protocol;
+
+	@Value("${service.lookUpNotepadCommandmentService.look_up_url}")
+	String lookUpUrl;
+
+	@Value("${service.mdmUserManagement.users_url}")
+	String usersUrl;
+
+	@Autowired
+	UserBranchMappingDTO userBranchMappingDTO;
 
 	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
+	@Autowired
+	Response response;
+
+/**
 	@Override
 	public String addUser(DFHeader header, UserDTO newUser) throws Exception {
 		
@@ -52,11 +97,12 @@ public class UserServiceImpl implements UserService {
 			 return saveUser(header,newUser);		
 			
 	}
-	private String saveUser(DFHeader header, UserDTO newUser) throws Exception {
+	**/
+	public String saveUser(DFHeader header, UserDTO newUser) throws Exception {
 		
 		try {
 			HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, BaseUtil.payload(header));
-			Map<String, String> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.POST, entity, Map.class).getBody();
+					Map<String, String> response = restTemplate.exchange(new URI(usersUrl), HttpMethod.POST, entity, Map.class).getBody();
 			return response.get("responseMessage");
 		} catch (RestClientResponseException e) {
 			log.error("Inside UserServiceImpl :: saveUser()" + e.getResponseBodyAsString());
@@ -66,11 +112,28 @@ public class UserServiceImpl implements UserService {
 	}	
 
 	@Override
-	public UserDTO getUser(DFHeader header, String userId) throws Exception {
+	public Response<UserDTO> getUser(DFHeader header, String userId) throws Exception {
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			return restTemplate.exchange(new URI(url + "/users/" + userId), HttpMethod.GET, entity, UserDTO.class)
+			UserDTO userDTO = restTemplate.exchange(new URI(usersUrl + userId), HttpMethod.GET, entity, UserDTO.class)
 					.getBody();
+			Response responseDTO = new Response();
+			List<UserDTO> userList = new ArrayList<>();
+			userList.add(userDTO);
+ 			responseDTO.setData(userList);
+			ResponseEntity<List<LookUpMDMDTO>> lookUpResponse = restTemplate.exchange(
+					new URI(lookUpUrl + "/lookUpValueByLookUpType/USER_CTGY" ), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
+					});
+			UserBranchMappingDTO branchMappingDTO = restTemplate.exchange(new URI(branchUrl + "/branchCode/" + userDTO.getDefaultBranch().getBranchCode()), HttpMethod.GET, entity, UserBranchMappingDTO.class)
+					.getBody();
+			branchMappingDTO.setIsDefault(userDTO.getDefaultBranch().getIsDefault());
+			branchMappingDTO.setAddOrRemove(userDTO.getDefaultBranch().getAddOrRemove());
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			referenceDTO.setCategoryList(lookUpResponse.getBody());
+			referenceDTO.setBranch(branchMappingDTO);
+			responseDTO.setRefernceList(referenceDTO);
+			return  responseDTO;
 
 		} catch (RestClientResponseException e) {
 			log.error("Inside UserServiceImpl :: getUser()" + e.getResponseBodyAsString());
@@ -79,14 +142,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<BranchDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception {
+	public Response<BranchDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception {
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<BranchDTO>> response = restTemplate.exchange(
-					new URI(url + "/users/" + userId + "/previlegeBranches"), HttpMethod.GET, entity,
+			ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(
+					new URI(usersUrl + userId + "/previlegeBranchCodes"), HttpMethod.GET, entity,
 					new ParameterizedTypeReference<List<BranchDTO>>() {
 					});
-			return response.getBody();
+			response.setData(branchDTOs.getBody());
+			response.setMessage("success");
+			return response;
 		} catch (RestClientResponseException e) {
 			log.error("Inside UserServiceImpl :: getPrevilegeBranches() " + e.getResponseBodyAsString());
 			throw e;
@@ -94,13 +159,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception {
+	public Response<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception {
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<RoleDTO>> response = restTemplate.exchange(new URI(url + "/users/" + userId + "/roles"),
+			ResponseEntity<List<RoleDTO>> roles = restTemplate.exchange(new URI(usersUrl + userId + "/roles"),
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<RoleDTO>>() {
 					});
-			return response.getBody();
+			response.setData(roles.getBody());
+			response.setMessage("success");
+			return response;
 		} catch (RestClientResponseException e) {
 			log.error("Inside UserServiceImpl :: getUserRoles() " + e.getResponseBodyAsString());
 			throw e;
@@ -111,7 +178,7 @@ public class UserServiceImpl implements UserService {
 	public List<UserDTO> getAllUsers(DFHeader header) throws Exception {
 		try {
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<UserDTO>> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.GET,
+			ResponseEntity<List<UserDTO>> response = restTemplate.exchange(new URI(usersUrl), HttpMethod.GET,
 					entity, new ParameterizedTypeReference<List<UserDTO>>() {
 					});
 			return response.getBody();
@@ -125,7 +192,7 @@ public class UserServiceImpl implements UserService {
 	public String updateUser(DFHeader header, UserDTO updatedUser) throws Exception {
 		try {
 			HttpEntity<UserDTO> entity = new HttpEntity<>(updatedUser, BaseUtil.payload(header));
-			Map<String, String> response = restTemplate.exchange(new URI(url + "/users"), HttpMethod.PUT, entity, Map.class).getBody();
+			Map<String, String> response = restTemplate.exchange(new URI(usersUrl), HttpMethod.PUT, entity, Map.class).getBody();
 			return response.get("responseMessage");
 
 		} catch (RestClientResponseException e) {
@@ -143,7 +210,7 @@ public class UserServiceImpl implements UserService {
 			Map<String, String> params = new HashMap<>();
 			params.put("userId", userId);
 			params.put("idKey", idKey);
-			URI uri = UriComponentsBuilder.fromUriString(url + "/users/{userId}/{idKey}/previlegeBranches")
+			URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}/previlegeBranches")
 					.buildAndExpand(params).toUri();
 			Map<String, String> response = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
 			return response.get("responseMessage");
@@ -164,7 +231,7 @@ public class UserServiceImpl implements UserService {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("userId", userId);
 			params.put("idKey", idKey);
-			URI uri = UriComponentsBuilder.fromUriString(url + "/users/{userId}/{idKey}/roles")
+			URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}/roles")
 					.buildAndExpand(params).toUri();
 			return restTemplate.exchange(uri, HttpMethod.PUT, entity, String.class).getBody();
 
@@ -174,5 +241,4 @@ public class UserServiceImpl implements UserService {
 		}
 
 	}
-
 }

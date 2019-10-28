@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.safexpress.propeli.bff.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.LookUpDTO;
-import com.safexpress.propeli.bff.dto.RoleDTO;
-import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.bff.service.MdmService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
@@ -42,22 +39,14 @@ public class MdmController {
 
 	@ApiOperation(value = "Fetches all Roles")
 	@GetMapping("roles")
-	public ResponseEntity<ResponseDTO> getAllRoles(@Valid DFHeader header) throws Exception {
-
-		List<RoleDTO> roles = service.getAllRoles(header);
-		responseDTO.setMessage("success");
-		responseDTO.setData(roles);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	public ResponseEntity<Response<RoleDTO>> getAllRoles(@Valid DFHeader header) throws Exception {
+		return ResponseEntity.status(HttpStatus.OK).body(service.getAllRoles(header));
 	}
 
 	@ApiOperation(value = "Fetches Permissions of a Role")
 	@GetMapping("roles/{roleId}/permissions")
-	public ResponseEntity<ResponseDTO> getRolePermission(@Valid DFHeader header, @PathVariable long roleId) throws Exception {
-
-		RolePermissionDTO roleDetail = service.getRolePermission(header, roleId);
-		responseDTO.setMessage("success");
-		responseDTO.setData(roleDetail);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	public ResponseEntity<Response<RolePermissionDTO>> getRolePermission(@Valid DFHeader header, @PathVariable long roleId) throws Exception {
+		return ResponseEntity.status(HttpStatus.OK).body(service.getRolePermission(header, roleId));
 	}
 
 	@ApiOperation(value = "Creates A Role with permissions")
@@ -81,22 +70,16 @@ public class MdmController {
 	}
 	
 	@ApiOperation(value = "lookup for user category and channel", notes = "lookup for user category and channel")
-	@GetMapping("lookup/{lokupType}")
-	public ResponseEntity<ResponseDTO> lookup(@Valid DFHeader header,  @PathVariable String lokupType)
+	@GetMapping("lookup/{lookupType}")
+	public ResponseEntity<Response<LookUpDTO>> lookup(@Valid DFHeader header,  @PathVariable String lookupType)
 			throws Exception {
-		List<LookUpDTO> response = service.lookupData(header, lokupType);
-		responseDTO.setMessage("success");
-		responseDTO.setData(response);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(service.lookupData(header, lookupType));
 	}
-	
-	@ApiOperation(value = "Branch List Details", notes = "Get a list of all Branch Details")
-	@GetMapping(path = "branches", produces = "application/json")
-	public ResponseEntity<ResponseDTO> getAllBranches(DFHeader header) throws Exception {
-		List<BranchDTO> reponse = service.getAllBranch(header);
-		responseDTO.setMessage("success");
-		responseDTO.setData(reponse);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+
+	@ApiOperation(value = "Menu Hierarchy List Details", notes = "Get a list of all Menu Hierarchies")
+	@GetMapping(path = "objects/menuHierarchies", produces = "application/json")
+	public ResponseEntity<Response<MenuHierarchyDTO>> getMenuHierarchy(DFHeader header) throws Exception {
+		return ResponseEntity.status(HttpStatus.OK).body(service.getMenuHierarchy(header));
 	}
 
 }
