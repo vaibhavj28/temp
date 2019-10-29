@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ReferenceDTO {
     private List<LookUpMDMDTO> categoryList;
-    private UserBranchMappingDTO branch;
+    private List<BranchDTO> branch;
 
     public List<LookUpMDMDTO> getCategoryList() {
         return categoryList;
@@ -14,11 +14,11 @@ public class ReferenceDTO {
         this.categoryList = categoryList;
     }
 
-    public UserBranchMappingDTO getBranch() {
+    public List<BranchDTO> getBranch() {
         return branch;
     }
 
-    public void setBranch(UserBranchMappingDTO branch) {
+    public void setBranch(List<BranchDTO> branch) {
         this.branch = branch;
     }
 }

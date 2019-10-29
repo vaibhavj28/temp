@@ -2,10 +2,7 @@ package com.safexpress.propeli.bff.service;
 
 import java.util.List;
 
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.Response;
-import com.safexpress.propeli.bff.dto.RoleDTO;
-import com.safexpress.propeli.bff.dto.UserDTO;
+import com.safexpress.propeli.bff.dto.*;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 /**
@@ -27,7 +24,7 @@ public interface UserService {
 
 	String updateUser(DFHeader header, UserDTO updatedUser) throws Exception;
 
-	String updateUserPrevilegeBranches(DFHeader header, String userId, String idKey, List<BranchDTO> previlegeBranches) throws Exception;
+	String updateUserPrevilegeBranches(DFHeader header, String userId, String idKey, List<UserBranchMappingDTO> previlegeBranches) throws Exception;
 
 	String updateUserRoles(DFHeader header, String userId, String idKey, List<RoleDTO> userRoles) throws Exception;
 

@@ -91,12 +91,12 @@ public class BranchServiceImpl implements BranchService {
             List<BranchDTO> branchDTOS = new ArrayList<>();
             branchDTOS.add(branchDTO);
             response.setData(branchDTOS);
-            ReferenceDTO referenceDTO = new ReferenceDTO();
+           /* ReferenceDTO referenceDTO = new ReferenceDTO();
             Optional.ofNullable(branchDTO.getBranchCode()).ifPresent(userBranchMappingDTO::setBranchCode);
             userBranchMappingDTO.setIsDefault(branchDTO.getIsDefault());
             userBranchMappingDTO.setAddOrRemove(branchDTO.getAddOrRemove());
             referenceDTO.setBranch(userBranchMappingDTO);
-            response.setRefernceList(referenceDTO);
+            response.setRefernceList(referenceDTO);*/
             response.setMessage(successMessage);
             return response;
         }
@@ -163,10 +163,12 @@ public class BranchServiceImpl implements BranchService {
     public Response<HierarchyBranchListDTO> getBranchHierarchyDetails(DFHeader header, List<BranchInputDTO> branchList ) throws Exception{
         try {
             HttpEntity<List<BranchInputDTO>> entity = new HttpEntity<>(branchList, BaseUtil.payload(header));
-            ResponseEntity<List<HierarchyBranchListDTO>> branchHierachies = restTemplate.exchange(new URI(branchUrl +"branchHierarchyDetails"),
-                    HttpMethod.POST, entity, new ParameterizedTypeReference<List<HierarchyBranchListDTO>>() {
+            ResponseEntity<HierarchyBranchListDTO> branchHierachies = restTemplate.exchange(new URI(branchUrl +"branchHierarchyDetails"),
+                    HttpMethod.POST, entity, new ParameterizedTypeReference<HierarchyBranchListDTO>() {
                     });
-            response.setData(branchHierachies.getBody());
+            List<HierarchyBranchListDTO> hierarchyBranchListDTOS = new ArrayList<>();
+            hierarchyBranchListDTOS.add(branchHierachies.getBody());
+            response.setData(hierarchyBranchListDTOS);
             response.setMessage(successMessage);
             return response;
         } catch (RestClientException | URISyntaxException e) {

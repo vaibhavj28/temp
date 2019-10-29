@@ -112,7 +112,7 @@ public class UserController {
 	public ResponseEntity<ResponseDTO> updateUserPrevilegeBranches(@Valid DFHeader header,
 			@ApiParam(value = "user id for which Previlege Branches have to be Updated", required = true) @PathVariable("uid") String userId,
 			@ApiParam(value = "user key for which Previlege Branches have to be Updated", required = true) @PathVariable String idKey,
-			@ApiParam(value = "Previlege Branch List to be Updated", required = true) @Valid @RequestBody List<BranchDTO> previlegeBranches) throws Exception {
+			@ApiParam(value = "Previlege Branch List to be Updated", required = true) @Valid @RequestBody List<UserBranchMappingDTO> previlegeBranches) throws Exception {
 		
 		String responseStatus = service.updateUserPrevilegeBranches(header, userId, idKey, previlegeBranches);
 		ResponseDTO responseDTO = new ResponseDTO();
