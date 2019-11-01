@@ -54,11 +54,4 @@ public class BranchController {
         return ResponseEntity.status(HttpStatus.OK).body(service.getAllBranch(header));
     }
 
-    @ApiOperation(value = "Get Branch Hierarchy Details", notes = "Get a list of all Branch Hierarchy Details")
-    @PostMapping("/branchHierarchyDetails")
-    public ResponseEntity<Response<HierarchyBranchListDTO>> getBranchHierarchyDetails(@Valid DFHeader header,
-                                                                                      @RequestBody List<UserBranchMappingDTO> branchList )
-            throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getBranchHierarchyDetails(header, branchList));
-    }
 }
