@@ -82,4 +82,11 @@ public class MdmController {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getMenuHierarchy(header));
 	}
 
+	@ApiOperation(value = "Get last n updated Role  Details", notes = "Get a list of all Role Details")
+	@GetMapping("roles/lastUpdated/{number}")
+	public ResponseEntity<Response<RoleDTO>> getLastNUpdatedRoles(@Valid DFHeader header,
+																  @PathVariable int number) throws Exception {
+		return ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedRoles(header, number));
+	}
+
 }

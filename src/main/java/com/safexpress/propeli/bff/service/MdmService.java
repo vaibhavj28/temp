@@ -20,4 +20,6 @@ public interface MdmService {
 
 	Response<MenuHierarchyDTO> getMenuHierarchy(DFHeader header) throws Exception;
 
+	Response<RoleDTO> getLastNUpdatedRoles(DFHeader header, int number) throws Exception;
+
 }

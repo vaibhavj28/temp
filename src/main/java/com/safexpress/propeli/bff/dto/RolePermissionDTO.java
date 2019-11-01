@@ -2,6 +2,8 @@ package com.safexpress.propeli.bff.dto;
 
 import java.sql.Timestamp;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.safexpress.propeli.bff.dto.RoleDTO;
@@ -13,7 +15,9 @@ public class RolePermissionDTO {
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp effectiveDate;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp expiryDate;
 	private long Id;
 	private String isAddOrRemoveOrUpdate;

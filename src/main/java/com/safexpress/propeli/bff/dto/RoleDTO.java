@@ -36,10 +36,10 @@ public class RoleDTO implements Serializable {
 	@JsonInclude(Include.NON_NULL)	
 	String addOrRemoveOrUpdate;
 	@JsonInclude(Include.NON_NULL)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
+	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp effectiveDate;
 	@JsonInclude(Include.NON_NULL)
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
+	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
 	private Timestamp expiryDate;
 	
 	

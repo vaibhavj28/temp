@@ -1,12 +1,10 @@
 package com.safexpress.propeli.bff.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.configuration.CommonBFFUtil;
+import com.safexpress.propeli.bff.dto.*;
+import com.safexpress.propeli.security.util.AuthUtil;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,12 +13,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.safexpress.propeli.bff.dto.EntityDTO;
-import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-import com.safexpress.propeli.servicebase.util.BaseUtil;
+
+import java.lang.ref.Reference;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class ObjectSerivceImpl implements ObjectSerivce {
@@ -28,40 +32,33 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Value("${service.mdmUserManagement.host}")
-	String host;
-	
-	@Value("${service.mdmUserManagement.port}")
-	String port;
-	
-	@Value("${service.mdmUserManagement.objects_uri}")
-	String uri;
-
 	@Value("${service.mdmUserManagement.objects_url}")
 	String objectUrl;
-	
-	private final String url = host + port + uri;
 
-	@Autowired
-	Response response;
+    @Value("${service.mdmUserManagement.objects_uri}")
+    String objectUri;
 
-	/*
-	 * @Override public ModuleObjectDTO saveObject(DFHeader header, ModuleObjectDTO
-	 * moduleObject) throws Exception { try { HttpEntity<ModuleObjectDTO> entity =
-	 * new HttpEntity<>(moduleObject, BaseUtil.payload(header)); return
-	 * restTemplate.exchange(new URI(url + "/object"), HttpMethod.POST, entity,
-	 * ModuleObjectDTO.class).getBody(); } catch (RestClientException |
-	 * URISyntaxException e) { throw new RuntimeException(e.getMessage()); } }
-	 */
+    @Value("${message.success}")
+    private
+    String successMessage;
+
+	@Value("${service.lookUpNotepadCommandmentService.look_up_url}")
+	String lookUpUrl;
 
 	@Override
 	public Response<ModuleObjectDTO> getAllObject(DFHeader header) throws Exception {
 		try {
-			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
+			Response<ModuleObjectDTO> response = new Response<>();
+ 			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
 			ResponseEntity<List<ModuleObjectDTO>> moduleObjects = restTemplate.exchange(new URI(objectUrl),
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
 					});
+
+			List<LookUpMDMDTO> lookUpChannels = getLookUpByChannelId(header, entity, moduleObjects);
 			response.setData(moduleObjects.getBody());
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			referenceDTO.setCategoryList(lookUpChannels);
+			response.setRefernceList(referenceDTO);
 			response.setMessage("success");
 			return response;
 		} catch (RestClientException | URISyntaxException e) {
@@ -69,20 +66,34 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 		}
 	}
 
-	/*
-	 * @Override public Integer updateObject(DFHeader header, ModuleObjectDTO
-	 * moduleObject) throws Exception { try { HttpEntity<ModuleObjectDTO> entity =
-	 * new HttpEntity<>(moduleObject, BaseUtil.payload(header)); return
-	 * restTemplate.exchange(new URI(url + "/object"), HttpMethod.PUT, entity,
-	 * Integer.class).getBody(); } catch (RestClientException | URISyntaxException
-	 * e) { throw new RuntimeException(e.getMessage()); } }
+	/**
+	 *
+	 * @param header DFHeader
+	 * @param entity HttpEntity<String> entity
+	 * @param moduleObjects ResponseEntity<List<ModuleObjectDTO>>
+	 * @return List<LookUpMDMDTO>
+	 * @throws URISyntaxException exception
 	 */
+	private List<LookUpMDMDTO> getLookUpByChannelId(DFHeader header, HttpEntity<String> entity, ResponseEntity<List<ModuleObjectDTO>> moduleObjects) throws URISyntaxException {
+		List<LookUpMDMDTO> lookUpChannels = new ArrayList<>();
+		String object = "lookUp";
+		if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+			for(ModuleObjectDTO moduleObjectDTO: moduleObjects.getBody()) {
+				LookUpMDMDTO lookUpMDMDTO = restTemplate.exchange(
+						new URI(lookUpUrl + "/lookUpValuesById/" + moduleObjectDTO.getChannelId()), HttpMethod.GET, entity,
+						new ParameterizedTypeReference<LookUpMDMDTO>() {
+						}).getBody();
+				lookUpChannels.add(lookUpMDMDTO);
+			}
+		}
+		return lookUpChannels.stream().filter(distinctByKey(LookUpMDMDTO::getId)).collect(Collectors.toList());
+	}
 
 	@Override
 	public ModuleObjectDTO getObjectById(DFHeader header, String objectId) throws Exception {
 		try {
 			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put("objectId", objectId);
 			URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/byId/{objectId}").buildAndExpand(params)
 					.toUri();
@@ -96,9 +107,9 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	public List<ModuleObjectDTO> getObjectByName(DFHeader header, String objectName) throws Exception {
 		try {
 			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put("objectName", objectName);
-			URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/byName/{objectName}").buildAndExpand(params)
+			URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/name/{objectName}").buildAndExpand(params)
 					.toUri();
 			ResponseEntity<List<ModuleObjectDTO>> reponse = restTemplate.exchange(uri, HttpMethod.GET, entity,
 					new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
@@ -112,8 +123,9 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 	@Override
 	public Response<EntityDTO> getSectionList(DFHeader header, long menuId) throws Exception {
 		try {
+			Response<EntityDTO> response = new Response<>();
 			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
-			Map<String, Long> params = new HashMap<String, Long>();
+			Map<String, Long> params = new HashMap<>();
 			params.put("menuId", menuId);
 			URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/sections/{menuId}").buildAndExpand(params).toUri();
 			ResponseEntity<List<EntityDTO>> entityList = restTemplate.exchange(uri, HttpMethod.GET, entity,
@@ -128,28 +140,56 @@ public class ObjectSerivceImpl implements ObjectSerivce {
 		}
 	}
 
-	/*
-	 * @Override public int saveSection(DFHeader header, EntityDTO entityDto) throws
-	 * Exception { try { HttpEntity<EntityDTO> entity = new HttpEntity<>(entityDto,
-	 * BaseUtil.payload(header)); return restTemplate.exchange(new URI(url +
-	 * "/section"), HttpMethod.POST, entity, Integer.class).getBody(); } catch
-	 * (RestClientException | URISyntaxException e) { throw new
-	 * RuntimeException(e.getMessage()); } }
-	 */
+    /**
+     *
+     * @param header
+     * @param number
+     * @return
+     * @throws Exception
+     */
+    public Response<ModuleObjectDTO> getLastNUpdatedObjects(DFHeader header, int number) throws Exception {
+        try {
+            String object = objectUri.replace("/", "");
+            Response<ModuleObjectDTO> response = new Response<>();
+            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+                ResponseEntity<List<ModuleObjectDTO>> objects = restTemplate.exchange(new URI(objectUrl + "lastUpdated/"+
+                                number), HttpMethod.GET,
+                        entity, new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
+                        });
+
+				List<LookUpMDMDTO> lookUpChannels = getLookUpMDMDTOS(header, entity, objects);
+				ReferenceDTO referenceDTO = new ReferenceDTO();
+				referenceDTO.setCategoryList(lookUpChannels);
+				response.setRefernceList(referenceDTO);
+                response.setData(objects.getBody());
+                response.setMessage(successMessage);
+            }
+            return response;
+        } catch (RestClientResponseException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+	private List<LookUpMDMDTO> getLookUpMDMDTOS(DFHeader header, HttpEntity<DFHeader> entity, ResponseEntity<List<ModuleObjectDTO>> objects) throws URISyntaxException {
+		List<LookUpMDMDTO> lookUpChannels = new ArrayList<>();
+		String lookUpObject = "lookUp";
+		if (CommonBFFUtil.isPermitted(header, lookUpObject, AuthUtil.permissionTypeEnum.GET)) {
+			for(ModuleObjectDTO moduleObjectDTO: objects.getBody()) {
+				LookUpMDMDTO lookUpMDMDTO = restTemplate.exchange(
+						new URI(lookUpUrl + "/lookUpValuesById/" + moduleObjectDTO.getChannelId()), HttpMethod.GET, entity,
+						new ParameterizedTypeReference<LookUpMDMDTO>() {
+						}).getBody();
+				if(!lookUpChannels.contains(lookUpMDMDTO.getId()))
+				lookUpChannels.add(lookUpMDMDTO);
+			}
+		}
+		return lookUpChannels.stream().filter(distinctByKey(LookUpMDMDTO::getId)).collect(Collectors.toList());
+	}
 
 
-//	@Override
-//	public List<AttributeDTO> getAttributeList(@Valid DFHeader header, long objectId) {
-//		try {
-//			HttpEntity<Long> entity = new HttpEntity<>(util.payload(header));
-//			Map<String, Long> params = new HashMap<String, Long>();
-//			params.put("objectId", objectId);
-//			URI uri = UriComponentsBuilder.fromUriString(url + "/object/attribute/{objectId}").buildAndExpand(params)
-//					.toUri();
-//			return restTemplate.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<List<AttributeDTO>>(){}).getBody();
-//		} catch (RestClientException e) {
-//			throw new RuntimeException(e.getMessage());
-//		}
-//	}
-
+	public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+		Set<Object> seen = ConcurrentHashMap.newKeySet();
+		return t -> seen.add(keyExtractor.apply(t));
+	}
 }

@@ -15,27 +15,27 @@ service:
      protocol: http://
      host: ${USER_MANAGEMENT_HOST:127.0.0.1}
      port: ${USER_MANAGEMENT_PORT::9095}
-     objects_uri: /v1/objects/
-     users_uri: /v1/users/
-     roles_uri: /v1/roles/
-     uri : /v1
-     users_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.users_uri}
-     objects_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.objects_uri}
-     roles_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.roles_uri}
-     mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.uri}
+     objects_uri: /objects/
+     users_uri: /users/
+     roles_uri: /roles/
+     version : /v1
+     users_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}${service.mdmUserManagement.users_uri}
+     objects_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}${service.mdmUserManagement.objects_uri}
+     roles_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}${service.mdmUserManagement.roles_uri}
+     mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}
 
   lookUpNotepadCommandmentService:
-      host: ${USER_MANAGEMENT_HOST:127.0.0.1}
-      port: ${USER_MANAGEMENT_PORT::9096}
-      lookUp_uri: /v1/mdm/
-      notePad_uri: /v1/mdm/notepad/
-      look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.lookUp_uri}
-      notepad_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.notePad_uri}
+      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:127.0.0.1}
+      port: ${LOOKUP_NOTEPAD_COMMANDMENT_PORT::9096}
+      version: /v1
+      lookUp_uri: /mdm/
+      look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.version}${service.lookUpNotepadCommandmentService.lookUp_uri}
   branchService:
-      host: ${USER_MANAGEMENT_HOST:127.0.0.1}
-      port: ${USER_MANAGEMENT_PORT::9001}
-      branch_uri: /v1/branches/
-      branch_url: ${service.mdmUserManagement.protocol}${service.branchService.host}${service.branchService.port}${service.branchService.branch_uri}
+      host: ${BRANCH_HOST:127.0.0.1}
+      port: ${BRANCH_PORT::9001}
+      version: /v1/
+      branch_uri: branches/
+      branch_url: ${service.mdmUserManagement.protocol}${service.branchService.host}${service.branchService.port}${service.branchService.version}${service.branchService.branch_uri}
 
         # Redis cache configuration
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          

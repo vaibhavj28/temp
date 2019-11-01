@@ -1,10 +1,14 @@
 package com.safexpress.propeli.bff.controller;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
+import com.safexpress.propeli.bff.dto.EntityDTO;
+import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
 import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.service.ObjectSerivce;
+import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.dto.ResponseDTO;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safexpress.propeli.bff.dto.EntityDTO;
-import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
-import com.safexpress.propeli.bff.service.ObjectSerivce;
-import com.safexpress.propeli.servicebase.annotation.SFXApi;
-import com.safexpress.propeli.servicebase.dto.ResponseDTO;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.validation.Valid;
+import java.util.List;
 
 @Api(value = "Object Operation service", tags = "Object Operation service", description = "Object Operation service")
 @RestController
@@ -96,7 +93,13 @@ public class ObjectController {
 	 * responsedto.setMessage("Update Failed"); } responsedto.setData("Status :  " +
 	 * response); return ResponseEntity.status(HttpStatus.OK).body(responsedto); }
 	 */
-	
+
+
+	@ApiOperation(value = "Get last n updated object Details", notes = "Get a list of all Object Details")
+	@GetMapping("v1/objects/lastUpdated/{number}")
+	public ResponseEntity<Response<ModuleObjectDTO>>getLastNUpdatedObjects(@Valid DFHeader header, @PathVariable int number) throws Exception {
+		return  ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedObjects(header,number));
+	}
 	
 
 }

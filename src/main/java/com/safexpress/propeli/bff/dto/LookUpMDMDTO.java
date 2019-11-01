@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 
 public class LookUpMDMDTO {
 
-
     /**
      *
      */
@@ -206,5 +205,4 @@ public class LookUpMDMDTO {
     public void setExpDt(Timestamp expDt) {
         this.expDt = expDt;
     }
-
 }
