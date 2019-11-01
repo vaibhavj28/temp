@@ -25,10 +25,10 @@
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
 		</dependency>
-		<!-- <dependency>
+		 <dependency>
 			<groupId>com.safexpress.propeli</groupId>
 			<artifactId>security-util</artifactId>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
