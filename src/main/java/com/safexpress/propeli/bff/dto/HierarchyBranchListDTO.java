@@ -6,20 +6,20 @@ import java.util.Map;
 public class HierarchyBranchListDTO {
 	
 	
-	List<BranchInputDTO> defaultBranchHierarchyList;
-	Map<Integer,List<BranchInputDTO>> privilegeBranchHierarchyList;
+	List<BranchHierarchyDTO> defaultBranchHierarchyList;
+	Map<Integer,List<BranchHierarchyDTO>> privilegeBranchHierarchyList;
 
 	
-	public List<BranchInputDTO> getDefaultBranchHierarchyList() {
+	public List<BranchHierarchyDTO> getDefaultBranchHierarchyList() {
 		return defaultBranchHierarchyList;
 	}
-	public void setDefaultBranchHierarchyList(List<BranchInputDTO> defaultBranchHierarchyList) {
+	public void setDefaultBranchHierarchyList(List<BranchHierarchyDTO> defaultBranchHierarchyList) {
 		this.defaultBranchHierarchyList = defaultBranchHierarchyList;
 	}
-	public Map<Integer, List<BranchInputDTO>> getPrivilageBranchHierarchyList() {
+	public Map<Integer, List<BranchHierarchyDTO>> getPrivilageBranchHierarchyList() {
 		return privilegeBranchHierarchyList;
 	}
-	public void setPrivilageBranchHierarchyList(Map<Integer, List<BranchInputDTO>> privilegeBranchHierarchyList) {
+	public void setPrivilageBranchHierarchyList(Map<Integer, List<BranchHierarchyDTO>> privilegeBranchHierarchyList) {
 		this.privilegeBranchHierarchyList = privilegeBranchHierarchyList;
 	}
 	
