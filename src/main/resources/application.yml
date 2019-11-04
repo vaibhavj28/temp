@@ -2,7 +2,7 @@ microapp:
   microId: common-bff
 
 server:
-  port: 9099
+  port: 9100
 
 # Core Services url
 service:
