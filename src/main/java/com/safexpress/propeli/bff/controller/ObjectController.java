@@ -28,8 +28,8 @@ public class ObjectController {
     @Autowired
     private ObjectSerivce service;
 
-    @Autowired
-    private ResponseDTO responsedto;
+   /* @Autowired
+    private ResponseDTO responsedto;*/
 
     /*
      * @PostMapping(path = "/object", produces = "application/json") public
