@@ -32,7 +32,7 @@ import com.safexpress.propeli.security.util.AuthUtil;
 /**
  * @author Arun Singh
  * @author Ajay Singh Negi
- * @ClassType Configuration	
+ * @ClassType Configuration
  *@Description Beans configuration for security and authorization
  */
 @Configuration
@@ -49,7 +49,7 @@ public class SecurityConfiguration {
 	public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
 		return new LifecycleBeanPostProcessor();
 	}
-	
+
 	@Bean
 	public Realm realm() {
 		CustomRealm realm = new CustomRealm();
@@ -75,7 +75,7 @@ public class SecurityConfiguration {
 //		securityMgr.setSessionManager(sessionManager());
 //		return securityMgr;
 //	}
-	
+
 	@Bean
 	public DefaultWebSecurityManager securityManager() {
 		DefaultWebSecurityManager securityMgr = new DefaultWebSecurityManager(realm());
@@ -92,26 +92,26 @@ public class SecurityConfiguration {
 		sessionManager.setSessionDAO(sessionDAO());
 		return sessionManager;
 	}
-	
+
 //	@Bean
 //	public SessionFilter sessionFilter() {
 //		return new SessionFilter();
 //	}
-	
-	@Bean
-	public SecurityFilter securityFilter() {
-		return new SecurityFilter();
-	}
-	
-	@Bean
-	public AuthFilter authFilter() {
-		return new AuthFilter();
-	}
-	
-	@Bean
-	public BranchAuthFilter branchAuthFilter() {
-		return new BranchAuthFilter();
-	}
+
+//	@Bean
+//	public SecurityFilter securityFilter() {
+//		return new SecurityFilter();
+//	}
+//
+//	@Bean
+//	public AuthFilter authFilter() {
+//		return new AuthFilter();
+//	}
+//
+//	@Bean
+//	public BranchAuthFilter branchAuthFilter() {
+//		return new BranchAuthFilter();
+//	}
 
 	@Bean
 	public SessionDAO sessionDAO() {
@@ -130,21 +130,21 @@ public class SecurityConfiguration {
 	@Bean
 	public ShiroFilterFactoryBean shiroFilterFactoryBean() {
 		ShiroFilterFactoryBean shiroFilterFactoryBean= new ShiroFilterFactoryBean();
-		shiroFilterFactoryBean.setSecurityManager(securityManager());		
+		shiroFilterFactoryBean.setSecurityManager(securityManager());
 		Map<String, Filter> filters= new HashMap<>();
 		filters.put("sessionFilter", new SessionFilter());
 		shiroFilterFactoryBean.setFilters(filters);
 		//shiroFilterFactoryBean.setFilterChainDefinitionMap(shiroFilterChainDefinition().getFilterChainMap());
 		Map<String, String> filterChainDefinitionMap= new HashMap<>();
-		
+
 		filterChainDefinitionMap.put("/**", "anon");
-		filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
-		
+		//filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
+
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
 	}
-	
-	@Bean
+
+	/*@Bean
 	public FilterRegistrationBean<SecurityFilter> securityFilterRegisterationBean() {
 
 	    FilterRegistrationBean<SecurityFilter> registration = new FilterRegistrationBean<>();
@@ -154,7 +154,7 @@ public class SecurityConfiguration {
 	    registration.setOrder(2);
 	    return registration;
 	}
-	
+
 	@Bean
 	public FilterRegistrationBean<AuthFilter> authFilterRegisterationBean() {
 
@@ -166,7 +166,7 @@ public class SecurityConfiguration {
 	    registration.setOrder(1);
 	    return registration;
 	}
-	
+
 	@Bean
 	public FilterRegistrationBean<BranchAuthFilter> branchAuthFilterRegisterationBean() {
 
@@ -177,5 +177,5 @@ public class SecurityConfiguration {
 	    // filter order should be set as per the requirement
 	    registration.setOrder(3);
 	    return registration;
-	}
+	}*/
 }
