@@ -1,0 +1,31 @@
+apiVersion: apps/v1  
+kind: Deployment  
+metadata:  
+  name: commonbff  
+  labels:  
+    app: commonbff  
+  namespace: dev  
+spec:  
+  replicas: 1  
+  selector:  
+    matchLabels:  
+      app: commonbff  
+  strategy:  
+    rollingUpdate:  
+      maxSurge: 25%  
+      maxUnavailable: 25%  
+    type: RollingUpdate  
+  template:  
+    metadata:  
+      labels:  
+        app: commonbff  
+    spec:  
+      containers:  
+      - image: 183454673550.dkr.ecr.ap-south-1.amazonaws.com/test1:latest  
+        imagePullPolicy: Always  
+        name: commonbff  
+        ports:  
+        - containerPort: 9099  
+          protocol: TCP  
+      imagePullSecrets:  
+      - name: aws-ecr 
