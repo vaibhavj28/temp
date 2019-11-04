@@ -8,11 +8,12 @@ spec:
     istio: pvt-ingressgateway  
   servers:  
   - port:  
-      number: 9000  
+      number: 9099  
       name: http-commonbff 
       protocol: HTTP  
     hosts:  
     - "*"  
+    
 apiVersion: networking.istio.io/v1alpha3  
 kind: VirtualService  
 metadata:  
