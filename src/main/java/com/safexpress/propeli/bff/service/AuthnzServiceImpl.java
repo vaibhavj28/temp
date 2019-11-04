@@ -35,7 +35,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	@Value("${service.authnz-service.url}")
+	@Value("${service.authnz.uri}")
 	String authnzServiceUrl;
 	
 	
