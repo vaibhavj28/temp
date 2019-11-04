@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3  
+kind: Gateway  
+metadata:  
+  name: commonbff  
+  namespace: dev  
+spec:  
+  selector:  
+    istio: pvt-ingressgateway  
+  servers:  
+  - port:  
+      number: 9000  
+      name: http-commonbff 
+      protocol: HTTP  
+    hosts:  
+    - "*"  
+apiVersion: networking.istio.io/v1alpha3  
+kind: VirtualService  
+metadata:  
+  name: commonbff 
+  namespace: dev  
+spec:  
+  hosts:  
+  - "*"  
+  gateways:  
+  - commonbff  
+  http:  
+  - match:  
+    - exact: /commonbff 
+    route:  
+    - destination:  
+        host: commonbff  
+        port:  
+          number: 9099 
