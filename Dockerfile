@@ -1,4 +1,4 @@
 FROM openjdk:8-jdk-alpine    
-ADD target/web-bff.jar.jar web-bff.jar.jar      
-ENTRYPOINT ["java", "-jar", "/web-bff.jar.jar"]    
+ADD target/CommonBFF.jar CommonBFF.jar      
+ENTRYPOINT ["java", "-jar", "/CommonBFF.jar"]    
 EXPOSE 9099
