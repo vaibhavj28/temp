@@ -1,4 +1,4 @@
 FROM openjdk:8-jdk-alpine    
 ADD target/CommonBFF.jar CommonBFF.jar      
 ENTRYPOINT ["java", "-jar", "/CommonBFF.jar"]    
-EXPOSE 9099
+EXPOSE 9100
