@@ -56,10 +56,9 @@ public class BranchServiceImpl implements BranchService {
      * @param header         DFHeader
      * @param numberOfBranch numberOfBranch
      * @return Response<BranchDTO>
-     * @throws Exception e
      */
     @Override
-    public Response<BranchDTO> getLatestNBranches(DFHeader header, int numberOfBranch) throws Exception {
+    public Response<BranchDTO> getLatestNBranches(DFHeader header, int numberOfBranch) {
         try {
             String object = branchUri.replace("/", "");
             Response<BranchDTO> response = new Response<>();
@@ -73,8 +72,8 @@ public class BranchServiceImpl implements BranchService {
                 response.setMessage(successMessage);
             }
             return response;
-        } catch (RestClientResponseException e) {
-            log.error("Inside BranchServiceImpl :: getLatestNBranches() {}", e.getResponseBodyAsByteArray());
+        } catch (RestClientResponseException | URISyntaxException e) {
+            log.error("Inside BranchServiceImpl :: getLatestNBranches() {}", e.getMessage());
             throw new ServiceException("", "", 780);
         }
     }
@@ -103,7 +102,7 @@ public class BranchServiceImpl implements BranchService {
             }
             result = response;
         } catch (RestClientResponseException e) {
-            throw e;
+            throw new ServiceException("", "", 780);
         }
         return result;
     }
@@ -131,17 +130,16 @@ public class BranchServiceImpl implements BranchService {
             }
             return response;
         } catch (RestClientResponseException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new ServiceException("RestTemplate Exception", e.getMessage());
         }
     }
 
     /**
      * @param header DFHeader
      * @return Response<BranchDTO>
-     * @throws Exception exception
      */
     @Override
-    public Response<BranchDTO> getAllBranch(DFHeader header) throws Exception {
+    public Response<BranchDTO> getAllBranch(DFHeader header) {
         try {
             String object = branchUri.replace("/", "");
             Response<BranchDTO> response = new Response<>();
@@ -154,8 +152,8 @@ public class BranchServiceImpl implements BranchService {
                 response.setMessage(successMessage);
             }
             return response;
-        } catch (RestClientException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (RestClientException | URISyntaxException e) {
+            throw new ServiceException("RestTemplate Exception", e.getMessage());
         }
     }
 
@@ -171,18 +169,46 @@ public class BranchServiceImpl implements BranchService {
             Response<HierarchyBranchListDTO> response = new Response<>();
             HttpEntity<List<UserBranchMappingDTO>> entity = new HttpEntity<>(branchList, BaseUtil.payload(header));
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.POST)) {
-                ResponseEntity<HierarchyBranchListDTO> branchHierachies = restTemplate.exchange(new URI(branchUrl +
+                ResponseEntity<HierarchyBranchListDTO> branchHierarchies = restTemplate.exchange(new URI(branchUrl +
                                 "branchHierarchyDetails"),
                         HttpMethod.POST, entity, new ParameterizedTypeReference<HierarchyBranchListDTO>() {
                         });
                 List<HierarchyBranchListDTO> hierarchyBranchListDTOS = new ArrayList<>();
-                hierarchyBranchListDTOS.add(branchHierachies.getBody());
+                hierarchyBranchListDTOS.add(branchHierarchies.getBody());
                 response.setData(hierarchyBranchListDTOS);
                 response.setMessage(successMessage);
             }
             return response;
         } catch (RestClientException | URISyntaxException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new ServiceException("RestTemplate Exception", e.getMessage());
         }
     }
+
+    /**
+     * This method will return the branches based on wild search on branch name
+     *
+     * @param header     DFHeader
+     * @param branchName String
+     * @return Response<BranchDTO>
+     */
+    public Response<BranchDTO> getBranchByName(DFHeader header, String branchName) {
+        Response<BranchDTO> result;
+        try {
+            String object = branchUri.replace("/", "");
+            Response<BranchDTO> response = new Response<>();
+            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+                List<BranchDTO> branchDTOs = restTemplate.exchange(new URI(branchUrl + branchName),
+                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
+                        }).getBody();
+                response.setData(branchDTOs);
+                response.setMessage(successMessage);
+            }
+            result = response;
+        } catch (RestClientResponseException | URISyntaxException e) {
+            throw new ServiceException("", "", 780);
+        }
+        return result;
+    }
+
 }

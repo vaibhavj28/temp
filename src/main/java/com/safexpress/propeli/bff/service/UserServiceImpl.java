@@ -144,15 +144,15 @@ public class UserServiceImpl implements UserService {
      * @throws URISyntaxException exception
      */
     private List<LookUpMDMDTO> getLookUpDetails(DFHeader header, HttpEntity<DFHeader> entity) throws URISyntaxException {
-        List<LookUpMDMDTO> lookUpMDMDTOs = new ArrayList<>();
+        List<LookUpMDMDTO> lookUpResponse = new ArrayList<>();
         String object = "lookUp";
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-            lookUpMDMDTOs = restTemplate.exchange(
-                    new URI(lookUpUrl + "/lookUpValueByLookUpType/USER_CTGY"), HttpMethod.GET, entity,
+            lookUpResponse = restTemplate.exchange(
+                    new URI(lookUpUrl + "/lookUpValueByLookUpType/USER_CTGY" ), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
-        return lookUpMDMDTOs;
+        return lookUpResponse;
     }
 
 
@@ -243,7 +243,11 @@ public class UserServiceImpl implements UserService {
                         entity, new ParameterizedTypeReference<List<UserDTO>>() {
                         }).getBody();
             }
+            List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
+            ReferenceDTO referenceDTO = new ReferenceDTO();
+            referenceDTO.setCategoryList(lookUpResponse);
             Response<UserDTO> response = new Response<>();
+            response.setRefernceList(referenceDTO);
             response.setData(userDTOs);
             response.setMessage(successMessage);
             return response;
@@ -360,6 +364,10 @@ public class UserServiceImpl implements UserService {
                                 number), HttpMethod.GET,
                         entity, new ParameterizedTypeReference<List<UserDTO>>() {
                         });
+                List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
+                ReferenceDTO referenceDTO = new ReferenceDTO();
+                referenceDTO.setCategoryList(lookUpResponse);
+                response.setRefernceList(referenceDTO);
                 response.setData(userDTOs.getBody());
                 response.setMessage(successMessage);
             }

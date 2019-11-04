@@ -28,7 +28,7 @@ public interface ObjectSerivce {
 	 * @param objectName
 	 * @throws Exception
 	 */
-	List<ModuleObjectDTO> getObjectByName(DFHeader header,String objectName) throws Exception;
+	Response<ModuleObjectDTO> getObjectByName(DFHeader header,String objectName) throws Exception;
 	
 	/**
 	 * @param ModuleObjectDTO

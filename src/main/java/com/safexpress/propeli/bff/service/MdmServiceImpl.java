@@ -25,12 +25,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.AnnotatedArrayType;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmServiceImpl implements MdmService {
@@ -47,6 +49,9 @@ public class MdmServiceImpl implements MdmService {
 	@Value("${service.mdmUserManagement.objects_url}")
 	private String objectUrl;
 
+	@Value("${service.mdmUserManagement.objects_uri}")
+	private String objectUri;
+
     @Value("${service.mdmUserManagement.roles_uri}")
     private String rolesUri;
 
@@ -59,12 +64,16 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public Response<RoleDTO> getAllRoles(DFHeader header) throws Exception {
 		try {
+			String object = rolesUri.replace("/", "");
 			Response<RoleDTO> response= new Response<>();
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<RoleDTO>> roles = restTemplate.exchange(new URI(rolesUrl), HttpMethod.GET,
-					entity, new ParameterizedTypeReference<List<RoleDTO>>() {
-					});
-			response.setData(roles.getBody());
+			List<RoleDTO> roles = new ArrayList<>();
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				 roles = restTemplate.exchange(new URI(rolesUrl), HttpMethod.GET,
+						entity, new ParameterizedTypeReference<List<RoleDTO>>() {
+						}).getBody();
+			}
+			response.setData(roles);
 			response.setMessage(successMessage);
 			return response;
 		} catch (RestClientException | URISyntaxException e) {
@@ -77,12 +86,20 @@ public class MdmServiceImpl implements MdmService {
 	public Response<RolePermissionDTO> getRolePermission(DFHeader header, long roleId) throws Exception {
 
 		try {
+			String object = rolesUri.replace("/", "");
 			Response<RolePermissionDTO> response= new Response<>();
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<RolePermissionDTO> rolePermissionDTO = restTemplate.exchange(new URI(rolesUrl + "permissions/" + roleId), HttpMethod.GET, entity,
-					RolePermissionDTO.class);
+			RolePermissionDTO rolePermissionDTO = new RolePermissionDTO();
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				rolePermissionDTO = restTemplate.exchange(new URI(rolesUrl + "permissions/" + roleId), HttpMethod.GET, entity,
+						RolePermissionDTO.class).getBody();
+			}
+			List<LookUpMDMDTO> lookUpChannels = getLookUpByChannel(header, entity);
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			referenceDTO.setCategoryList(lookUpChannels);
 			List<RolePermissionDTO> rolePermission = new ArrayList<>();
-			rolePermission.add(rolePermissionDTO.getBody());
+			rolePermission.add(rolePermissionDTO);
+			response.setRefernceList(referenceDTO);
 			response.setData(rolePermission);
 			response.setMessage(successMessage);
 			return  response;
@@ -93,15 +110,31 @@ public class MdmServiceImpl implements MdmService {
 		}
 	}
 
+	private List<LookUpMDMDTO> getLookUpByChannel(DFHeader header, HttpEntity<DFHeader> entity) throws URISyntaxException {
+		List<LookUpMDMDTO> lookUpChannels = new ArrayList<>();
+		String lookUpObject = "lookUp";
+		if (CommonBFFUtil.isPermitted(header, lookUpObject, AuthUtil.permissionTypeEnum.GET)) {
+				lookUpChannels = restTemplate.exchange(
+						new URI(lookUpUrl + "/lookUpValueByLookUpType/CHANNEL"), HttpMethod.GET, entity,
+						new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
+						}).getBody();
+		}
+		return lookUpChannels;
+	}
+
 	@Override
-	public ResponseDTO addRolePermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
+	public ResponseDTO<Integer> addRolePermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
 		try {
+			String object = rolesUri.replace("/", "");
 			HttpEntity<RoleDTO> entity = new HttpEntity<>(roleDetail.getRoleDto(), BaseUtil.payload(header));
-			ResponseDTO response = new ResponseDTO();
+			ResponseDTO<Integer> response = new ResponseDTO<>();
 			int status = 0;
 			String data = null;
-			RoleDTO role = restTemplate.exchange(new URI(rolesUrl), HttpMethod.POST, entity, RoleDTO.class)
-					.getBody();
+			RoleDTO role = new RoleDTO();
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.POST)) {
+				role = restTemplate.exchange(new URI(rolesUrl), HttpMethod.POST, entity, RoleDTO.class)
+						.getBody();
+			}
 			if (role.getRoleId() != 0) {
 				status = 1;
 				data = "role created without permissions";
@@ -132,10 +165,15 @@ public class MdmServiceImpl implements MdmService {
 	 */
 	private int addPermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
 		try {
-		HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail,BaseUtil.payload(header));
-		return restTemplate.exchange(new URI(rolesUrl + "permissions"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
+			String object = rolesUri.replace("/", "");
+		    HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail,BaseUtil.payload(header));
+		    int result = 0;
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				result =  restTemplate.exchange(new URI(rolesUrl + "permissions"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
+			}
+			return  result;
 		} catch (RestClientException e) {
-			log.error("Inside MdmServiceImpl :: addRolePermission() " + e.getMessage());
+			log.error("Inside MdmServiceImpl :: addPermission() " + e.getMessage());
 			return 0;
 		}
 	}
@@ -149,15 +187,19 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public Response<LookUpDTO> lookupData(@Valid DFHeader header, String lookupType) {
 		try {
+			String object = "lookUp";
 			Response<LookUpDTO> response= new Response<>();
 			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("lookupType", lookupType);
+			List<LookUpDTO> lookUpDTOs = new ArrayList<>();
 			URI uri = UriComponentsBuilder.fromUriString(lookUpUrl + "/lookUpValueByLookUpType/{lookupType}").buildAndExpand(params).toUri();
-			ResponseEntity<List<LookUpDTO>> lookUpDTOs=restTemplate.exchange(uri, HttpMethod.GET, entity,
-					new ParameterizedTypeReference<List<LookUpDTO>>() {
-					});
-			response.setData(lookUpDTOs.getBody());
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				lookUpDTOs = restTemplate.exchange(uri, HttpMethod.GET, entity,
+						new ParameterizedTypeReference<List<LookUpDTO>>() {
+						}).getBody();
+			}
+			response.setData(lookUpDTOs);
 			response.setMessage(successMessage);
 			return response;
 		} catch (RestClientException e) {
@@ -175,9 +217,14 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public Integer editRolePermission(DFHeader header, RolePermissionDTO roleDetail) {
 		try {
+			String object = rolesUri.replace("/", "");
 			HttpEntity<RolePermissionDTO> entity = new HttpEntity<>(roleDetail, BaseUtil.payload(header));
-			return restTemplate.exchange(new URI(rolesUrl + "/permissions"), HttpMethod.PUT, entity, Integer.class)
-					.getBody();
+			Integer result = null;
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				result= restTemplate.exchange(new URI(rolesUrl + "/permissions"), HttpMethod.PUT, entity, Integer.class)
+						.getBody();
+			}
+			return  result;
 			
 		} catch (RestClientException | URISyntaxException e) {
 			throw new RuntimeException(e.getMessage());
@@ -194,12 +241,16 @@ public class MdmServiceImpl implements MdmService {
 	@Override
 	public Response<MenuHierarchyDTO> getMenuHierarchy(DFHeader header) throws Exception {
 		try {
+			String object = objectUri.replace("/", "");
 			Response<MenuHierarchyDTO> response= new Response<>();
 			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-			ResponseEntity<List<MenuHierarchyDTO>> menuHierarchyDTOs = restTemplate.exchange(new URI( objectUrl+ "menuHierarchies"), HttpMethod.GET,
-					entity, new ParameterizedTypeReference<List<MenuHierarchyDTO>>() {
-					});
-			response.setData(menuHierarchyDTOs.getBody());
+			List<MenuHierarchyDTO> menuHierarchyDTOs = new ArrayList<>();
+			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+				menuHierarchyDTOs = restTemplate.exchange(new URI(objectUrl + "menuHierarchies"), HttpMethod.GET,
+						entity, new ParameterizedTypeReference<List<MenuHierarchyDTO>>() {
+						}).getBody();
+			}
+			response.setData(menuHierarchyDTOs);
 			response.setMessage(successMessage);
 			return response;
 		} catch (RestClientException | URISyntaxException e) {
@@ -207,6 +258,14 @@ public class MdmServiceImpl implements MdmService {
 			throw e;
 		}
 	}
+
+	/**
+	 *
+	 * @param header DFHeader
+	 * @param number int
+	 * @return Response<RoleDTO>
+	 * @throws Exception excpetion
+	 */
     public Response<RoleDTO> getLastNUpdatedRoles(DFHeader header, int number) throws Exception {
         try {
             String object = rolesUri.replace("/", "");
@@ -223,8 +282,20 @@ public class MdmServiceImpl implements MdmService {
             return response;
         } catch (RestClientResponseException e) {
             InputStream body = new ByteArrayInputStream(e.getResponseBodyAsByteArray());
-            log.error("Inside UserServiceImpl :: editUser() {}", e.getResponseBodyAsString());
+            log.error("Inside UserServiceImpl :: getLastNUpdatedRoles() {}", e.getResponseBodyAsString());
             throw new ServiceException(body.toString(), "", 500);
         }
     }
+
+	/**
+	 *
+	 * @param keyExtractor Function<? super T, ?>
+	 * @param <T> Type
+	 * @return <T> Predicate<T>
+	 */
+
+	private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+		Set<Object> seen = ConcurrentHashMap.newKeySet();
+		return t -> seen.add(keyExtractor.apply(t));
+	}
 }

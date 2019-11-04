@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Api(value = "Object Operation service", tags = "Object Operation service", description = "Object Operation service")
 @RestController
@@ -26,80 +25,77 @@ import java.util.List;
 @RequestMapping("/secure/um/v1")
 public class ObjectController {
 
-	@Autowired
-	private ObjectSerivce service;
+    @Autowired
+    private ObjectSerivce service;
 
-	@Autowired
-	private ResponseDTO responsedto;
+    @Autowired
+    private ResponseDTO responsedto;
 
-	/*
-	 * @PostMapping(path = "/object", produces = "application/json") public
-	 * ResponseEntity<ResponseDTO> createObject(@Valid DFHeader header,
-	 * 
-	 * @ApiParam(value = "Object data to be inserted", required =
-	 * true) @Valid @RequestBody ModuleObjectDTO moduleObject) throws Exception {
-	 * 
-	 * ModuleObjectDTO response = service.saveObject(header, moduleObject);
-	 * responsedto.setMessage("success"); responsedto.setData(response); return
-	 * ResponseEntity.status(HttpStatus.OK).body(responsedto); }
-	 */
+    /*
+     * @PostMapping(path = "/object", produces = "application/json") public
+     * ResponseEntity<ResponseDTO> createObject(@Valid DFHeader header,
+     *
+     * @ApiParam(value = "Object data to be inserted", required =
+     * true) @Valid @RequestBody ModuleObjectDTO moduleObject) throws Exception {
+     *
+     * ModuleObjectDTO response = service.saveObject(header, moduleObject);
+     * responsedto.setMessage("success"); responsedto.setData(response); return
+     * ResponseEntity.status(HttpStatus.OK).body(responsedto); }
+     */
 
-	@ApiOperation(value = "Object List Details", notes = "Get a list of all Object Details")
-	@GetMapping(path = "/object", produces = "application/json")
-	public ResponseEntity<Response<ModuleObjectDTO>> getAllObject(DFHeader header) throws Exception {
-		Response<ModuleObjectDTO> response = service.getAllObject(header);
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+    @ApiOperation(value = "Object List Details", notes = "Get a list of all Object Details")
+    @GetMapping(path = "/object", produces = "application/json")
+    public ResponseEntity<Response<ModuleObjectDTO>> getAllObject(DFHeader header) throws Exception {
+        Response<ModuleObjectDTO> response = service.getAllObject(header);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-	/*
-	 * @ApiOperation(value = "Update object Details", notes =
-	 * "Update object Details")
-	 * 
-	 * @PutMapping("/object") public ResponseEntity<ResponseDTO> updateObject(@Valid
-	 * DFHeader header, @RequestBody ModuleObjectDTO moduleObject) throws Exception
-	 * { Integer response = service.updateObject(header, moduleObject); if
-	 * (!(response == 0)) { responsedto.setMessage("Succefully updated"); } else {
-	 * responsedto.setMessage("Update Failed"); } responsedto.setData("Status :  " +
-	 * response); return ResponseEntity.status(HttpStatus.OK).body(responsedto); }
-	 */
+    /*
+     * @ApiOperation(value = "Update object Details", notes =
+     * "Update object Details")
+     *
+     * @PutMapping("/object") public ResponseEntity<ResponseDTO> updateObject(@Valid
+     * DFHeader header, @RequestBody ModuleObjectDTO moduleObject) throws Exception
+     * { Integer response = service.updateObject(header, moduleObject); if
+     * (!(response == 0)) { responsedto.setMessage("Succefully updated"); } else {
+     * responsedto.setMessage("Update Failed"); } responsedto.setData("Status :  " +
+     * response); return ResponseEntity.status(HttpStatus.OK).body(responsedto); }
+     */
 
-	@ApiOperation(value = "Get object Details by Name", notes = "Get object Details")
-	@GetMapping("/object/name/{objectName}")
-	public ResponseEntity<ResponseDTO> getObjectByName(@Valid DFHeader header, @PathVariable String objectName)
-			throws Exception {
-		List<ModuleObjectDTO> response = service.getObjectByName(header, objectName);
-		responsedto.setMessage("success");
-		responsedto.setData(response);
-		return ResponseEntity.status(HttpStatus.OK).body(responsedto);
-	}
+    @ApiOperation(value = "Get object Details by Name", notes = "Get object Details")
+    @GetMapping("/object/name/{objectName}")
+    public ResponseEntity<Response<ModuleObjectDTO>> getObjectByName(@Valid DFHeader header, @PathVariable String objectName)
+            throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getObjectByName(header, objectName));
+    }
 
 
-	@ApiOperation(value = "Object section Details", notes = "Get a list of all Object section Details")
-	@GetMapping("/section/{menuId}")
-	public ResponseEntity<Response<EntityDTO>> getSectionList(@Valid DFHeader header, @PathVariable long menuId)
-			throws Exception {
-		Response<EntityDTO> response = service.getSectionList(header, menuId);
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+    @ApiOperation(value = "Object section Details", notes = "Get a list of all Object section Details")
+    @GetMapping("/section/{menuId}")
+    public ResponseEntity<Response<EntityDTO>> getSectionList(@Valid DFHeader header, @PathVariable long menuId)
+            throws Exception {
+        Response<EntityDTO> response = service.getSectionList(header, menuId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-	/*
-	 * @ApiOperation(value = "Object section Details", notes =
-	 * "save Object section Details")
-	 * 
-	 * @PostMapping("/section") public ResponseEntity<ResponseDTO>
-	 * saveSection(@Valid DFHeader header, @RequestBody EntityDTO entityDto) throws
-	 * Exception { Integer response = service.saveSection(header, entityDto); if
-	 * (!(response == 0)) { responsedto.setMessage("Succefully updated"); } else {
-	 * responsedto.setMessage("Update Failed"); } responsedto.setData("Status :  " +
-	 * response); return ResponseEntity.status(HttpStatus.OK).body(responsedto); }
-	 */
+    /*
+     * @ApiOperation(value = "Object section Details", notes =
+     * "save Object section Details")
+     *
+     * @PostMapping("/section") public ResponseEntity<ResponseDTO>
+     * saveSection(@Valid DFHeader header, @RequestBody EntityDTO entityDto) throws
+     * Exception { Integer response = service.saveSection(header, entityDto); if
+     * (!(response == 0)) { responsedto.setMessage("Succefully updated"); } else {
+     * responsedto.setMessage("Update Failed"); } responsedto.setData("Status :  " +
+     * response); return ResponseEntity.status(HttpStatus.OK).body(responsedto); }
+     */
 
 
-	@ApiOperation(value = "Get last n updated object Details", notes = "Get a list of all Object Details")
-	@GetMapping("v1/objects/lastUpdated/{number}")
-	public ResponseEntity<Response<ModuleObjectDTO>>getLastNUpdatedObjects(@Valid DFHeader header, @PathVariable int number) throws Exception {
-		return  ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedObjects(header,number));
-	}
-	
+    @ApiOperation(value = "Get last n updated object Details", notes = "Get a list of all Object Details")
+    @GetMapping("v1/objects/lastUpdated/{number}")
+    public ResponseEntity<Response<ModuleObjectDTO>> getLastNUpdatedObjects(@Valid DFHeader header, @PathVariable int number) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedObjects(header, number));
+    }
+
 
 }
