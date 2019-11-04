@@ -152,7 +152,7 @@ public class BranchServiceImpl implements BranchService {
                 response.setMessage(successMessage);
             }
             return response;
-        } catch (RestClientException | URISyntaxException e) {
+        } catch (RestClientException | URISyntaxException | ServiceException e) {
             throw new ServiceException("RestTemplate Exception", e.getMessage());
         }
     }

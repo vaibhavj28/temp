@@ -1,29 +1,19 @@
 package com.safexpress.propeli.bff.controller;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.safexpress.propeli.bff.dto.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.safexpress.propeli.bff.service.MdmService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Api(value = "User Management MDM BFF Controller")
 @SFXApi
@@ -33,9 +23,6 @@ public class MdmController {
 
 	@Autowired
 	private MdmService service;
-	
-	@Autowired
-	private ResponseDTO responseDTO;
 
 	@ApiOperation(value = "Fetches all Roles")
 	@GetMapping("roles")
@@ -62,7 +49,7 @@ public class MdmController {
 	@PutMapping("roles")
 	public ResponseEntity<ResponseDTO> updateRolePermission(@Valid DFHeader header,
 			@ApiParam(value = "Role data to be updated", required = true) @Valid @RequestBody RolePermissionDTO roleDetail) {
-
+		ResponseDTO responseDTO = new ResponseDTO();
 		Integer res = service.editRolePermission(header,roleDetail);
 		responseDTO.setMessage("Role Updated");
 		responseDTO.setData(res);
