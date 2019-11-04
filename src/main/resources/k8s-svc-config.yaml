@@ -8,12 +8,12 @@ metadata:
   annotations:  
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"  
     prometheus.io/scrape: 'true'  
-    prometheus.io/port:   '9099'  
+    prometheus.io/port:   '9100'  
   
 spec:  
   type: LoadBalancer  
   ports:  
   - protocol: TCP  
-    port: 9099  
+    port: 9100  
   selector:  
     app: commonbff
