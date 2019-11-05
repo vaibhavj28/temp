@@ -98,20 +98,20 @@ public class SecurityConfiguration {
 //		return new SessionFilter();
 //	}
 
-//	@Bean
-//	public SecurityFilter securityFilter() {
-//		return new SecurityFilter();
-//	}
-//
-//	@Bean
-//	public AuthFilter authFilter() {
-//		return new AuthFilter();
-//	}
-//
-//	@Bean
-//	public BranchAuthFilter branchAuthFilter() {
-//		return new BranchAuthFilter();
-//	}
+	@Bean
+	public SecurityFilter securityFilter() {
+		return new SecurityFilter();
+	}
+
+	@Bean
+	public AuthFilter authFilter() {
+		return new AuthFilter();
+	}
+
+	@Bean
+	public BranchAuthFilter branchAuthFilter() {
+		return new BranchAuthFilter();
+	}
 
 	@Bean
 	public SessionDAO sessionDAO() {
@@ -138,13 +138,13 @@ public class SecurityConfiguration {
 		Map<String, String> filterChainDefinitionMap= new HashMap<>();
 
 		filterChainDefinitionMap.put("/**", "anon");
-		//filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
+		filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
 
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
 	}
 
-	/*@Bean
+	@Bean
 	public FilterRegistrationBean<SecurityFilter> securityFilterRegisterationBean() {
 
 	    FilterRegistrationBean<SecurityFilter> registration = new FilterRegistrationBean<>();
@@ -177,5 +177,5 @@ public class SecurityConfiguration {
 	    // filter order should be set as per the requirement
 	    registration.setOrder(3);
 	    return registration;
-	}*/
+	}
 }

@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import com.safexpress.propeli.bff.dto.CredentialDTO;
 import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
 import com.safexpress.propeli.bff.dto.TokenDTO;
-import com.safexpress.propeli.security.util.AuthUtil;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 import com.safexpress.propeli.servicebase.util.BaseUtil;
 
@@ -36,7 +35,10 @@ public class AuthnzServiceImpl implements AuthnzService {
 	private RestTemplate restTemplate;
 	
 	@Value("${service.authnz.uri}")
-	String authnzServiceUrl;
+	private String authnzServiceUri;
+
+	@Value("${service.authnz.url}")
+	private String authnzServiceUrl;
 	
 	
 	@Override

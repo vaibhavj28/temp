@@ -7,9 +7,11 @@ server:
 # Core Services url
 service:
   authnz:
-    host: ${AUTHNZ_HOST:127.0.0.1}
-    port: ${AUTHNZ_PORT:7000}  
-    uri: /v1  
+    protocol: http://
+    host: ${AUTHNZ_HOST:10.1.233.48}
+    port: ${AUTHNZ_PORT::9069}
+    uri: /v1
+    url: ${service.authnz.protocol}${service.authnz.host}${service.authnz.port}${service.authnz.uri}
      
   mdmUserManagement:
      protocol: http://
