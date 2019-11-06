@@ -25,7 +25,7 @@ spec:
         imagePullPolicy: Always  
         name: commonbff  
         ports:  
-        - containerPort: 9100  
+        - containerPort: 80  
           protocol: TCP  
       imagePullSecrets:  
       - name: aws-ecr 
