@@ -8,7 +8,7 @@ spec:
     istio: pvt-ingressgateway  
   servers:  
   - port:  
-      number: 9100
+      number: 80
       name: http-commonbff 
       protocol: HTTP  
     hosts:  
@@ -31,4 +31,4 @@ spec:
     - destination:  
         host: commonbff  
         port:  
-          number: 9100 
+          number: 80 
