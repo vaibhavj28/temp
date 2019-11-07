@@ -93,11 +93,6 @@ public class SecurityConfiguration {
 		return sessionManager;
 	}
 
-//	@Bean
-//	public SessionFilter sessionFilter() {
-//		return new SessionFilter();
-//	}
-
 	@Bean
 	public SecurityFilter securityFilter() {
 		return new SecurityFilter();
@@ -109,23 +104,10 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public BranchAuthFilter branchAuthFilter() {
-		return new BranchAuthFilter();
-	}
-
-	@Bean
 	public SessionDAO sessionDAO() {
 		return new EnterpriseCacheSessionDAO();
 	}
 
-//	@Bean
-//	public ShiroFilterChainDefinition shiroFilterChainDefinition() {
-//		DefaultShiroFilterChainDefinition filter = new DefaultShiroFilterChainDefinition();
-//		filter.addPathDefinition("/**", "anon");
-//		filter.addPathDefinition("/secure/*", "authc");
-//		filter.addPathDefinition("/secure/*", "sessionFilter");
-//		return filter;
-//	}
 
 	@Bean
 	public ShiroFilterFactoryBean shiroFilterFactoryBean() {
@@ -133,13 +115,12 @@ public class SecurityConfiguration {
 		shiroFilterFactoryBean.setSecurityManager(securityManager());
 		Map<String, Filter> filters= new HashMap<>();
 		filters.put("sessionFilter", new SessionFilter());
+		filters.put("branchAuthFilter", new BranchAuthFilter());
 		shiroFilterFactoryBean.setFilters(filters);
-		//shiroFilterFactoryBean.setFilterChainDefinitionMap(shiroFilterChainDefinition().getFilterChainMap());
 		Map<String, String> filterChainDefinitionMap= new HashMap<>();
-
+		// here url pattern is as per shiro
 		filterChainDefinitionMap.put("/**", "anon");
-		filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
-
+		filterChainDefinitionMap.put("/secure/**", "sessionFilter,branchAuthFilter");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
 	}
@@ -160,22 +141,12 @@ public class SecurityConfiguration {
 
 	    FilterRegistrationBean<AuthFilter> registration = new FilterRegistrationBean<>();
 	    registration.setFilter(authFilter());
-	    registration.addUrlPatterns("/secure");
+	    registration.addUrlPatterns("/secure/*"); // url pattern is as per servlet specification
 	    registration.setName(AuthUtil.filterTypeEnum.AUTH_FILTER.value());
 	    // filter order should be set as per the requirement
 	    registration.setOrder(1);
 	    return registration;
 	}
 
-	@Bean
-	public FilterRegistrationBean<BranchAuthFilter> branchAuthFilterRegisterationBean() {
 
-	    FilterRegistrationBean<BranchAuthFilter> registration = new FilterRegistrationBean<>();
-	    registration.setFilter(branchAuthFilter());
-	    registration.addUrlPatterns("/secure");
-	    registration.setName(AuthUtil.filterTypeEnum.BRANCH_AUTH_FILTER.value());
-	    // filter order should be set as per the requirement
-	    registration.setOrder(3);
-	    return registration;
-	}
 }

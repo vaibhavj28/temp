@@ -43,8 +43,8 @@ service:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 app:           
   redis:
-    host: ${REDIS_HOST:127.0.0.1}
-    password: ${REDIS_PASSWORD:admin}
+    host: ${REDIS_HOST:master.dev-private-propel-i-redis-ec.97ggud.aps1.cache.amazonaws.com}
+    password: ${REDIS_PASSWORD:XM2tK7PLaD3FV6NxATBt}
     port: ${REDIS_PORT:6379}
 ad:
   service:
