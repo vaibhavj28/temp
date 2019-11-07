@@ -31,4 +31,22 @@ spec:
     - destination:  
         host: commonbff  
         port:  
-          number: 80 
+          number: 80
+    corsPolicy:
+      allowOrigin:
+      - "http://*.ap-south-1.elb.amazonaws.com"
+      allowMethods:
+      - POST
+      - GET
+      - DELETE
+      - PUT
+      allowHeaders:
+      - authorization
+      - content-type
+      - accept
+      - origin
+      - user-agent
+      exposeHeaders:
+      - x-custom-header
+      maxAge: 300s
+      allowCredentials: true     
