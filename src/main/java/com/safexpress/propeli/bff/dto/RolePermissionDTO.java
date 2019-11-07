@@ -1,24 +1,25 @@
 package com.safexpress.propeli.bff.dto;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.safexpress.propeli.bff.dto.RoleDTO;
 
+@Validated
 public class RolePermissionDTO {
-	@JsonInclude(Include.NON_NULL)
+	@NotNull(message = "Role object cannot be null")	
 	private RoleDTO roleDto;
 	private String status;
 	private String description;
 	private String createdBy;
 	private String updatedBy;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
-	private Timestamp effectiveDate;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
-	private Timestamp expiryDate;
+	private Date effectiveDate;
+	private Date expiryDate;
 	private long Id;
 	private String isAddOrRemoveOrUpdate;
 	@JsonInclude(Include.NON_NULL)
@@ -36,6 +37,7 @@ public class RolePermissionDTO {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
+	
 	
 	
 	/**
@@ -88,30 +90,6 @@ public class RolePermissionDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	/**
-	 * @return the effectiveDate
-	 */
-	public Timestamp getEffectiveDate() {
-		return effectiveDate;
-	}
-	/**
-	 * @param effectiveDate the effectiveDate to set
-	 */
-	public void setEffectiveDate(Timestamp effectiveDate) {
-		this.effectiveDate = effectiveDate;
-	}
-	/**
-	 * @return the expiryDate
-	 */
-	public Timestamp getExpiryDate() {
-		return expiryDate;
-	}
-	/**
-	 * @param expiryDate the expiryDate to set
-	 */
-	public void setExpiryDate(Timestamp expiryDate) {
-		this.expiryDate = expiryDate;
-	}
 	public long getId() {
 		return Id;
 	}
@@ -124,6 +102,18 @@ public class RolePermissionDTO {
 	public void setIsAddOrRemoveOrUpdate(String isAddOrRemoveOrUpdate) {
 		this.isAddOrRemoveOrUpdate = isAddOrRemoveOrUpdate;
 	}
+	public Date getEffectiveDate() {
+		return effectiveDate;
+	}
+	public void setEffectiveDate(Date effectiveDate) {
+		this.effectiveDate = effectiveDate;
+	}
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
 	
-
+	
 }
