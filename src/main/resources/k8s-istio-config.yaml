@@ -34,7 +34,7 @@ spec:
           number: 80
     corsPolicy:
       allowOrigin:
-      - 'http://*.ap-south-1.elb.amazonaws.com'
+      - 'http://*internal-a12992823014a11ea86a00a1a1c1cf90-304262220.ap-south-1.elb.amazonaws.com'
       allowMethods:
       - POST
       - GET
