@@ -1,16 +1,21 @@
 package com.safexpress.propeli.bff.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
+import java.util.Date;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.sql.Timestamp;
 
+import org.springframework.validation.annotation.Validated;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import io.swagger.annotations.ApiModelProperty;
+
+@Validated
 public class RoleDTO implements Serializable {
 	private static final long serialVersionUID = 3170771691990515776L;
 	
@@ -36,27 +41,27 @@ public class RoleDTO implements Serializable {
 	@JsonInclude(Include.NON_NULL)	
 	String addOrRemoveOrUpdate;
 	@JsonInclude(Include.NON_NULL)
-	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
-	private Timestamp effectiveDate;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private Date effectiveDate;
 	@JsonInclude(Include.NON_NULL)
-	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
-	private Timestamp expiryDate;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private Date expiryDate;
 	
 	
 	public String getCreatedBy() {
 		return createdBy;
 	}
-
-	public String getAddOrRemove() {
+	
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+	
+	public String getAddOrRemoveOrUpdate() {
 		return addOrRemoveOrUpdate;
 	}
 
-	public void setAddOrRemove(String addOrRemove) {
-		this.addOrRemoveOrUpdate = addOrRemove;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
+	public void setAddOrRemoveOrUpdate(String addOrRemoveOrUpdate) {
+		this.addOrRemoveOrUpdate = addOrRemoveOrUpdate;
 	}
 
 	public String getUpdatedBy() {
@@ -99,22 +104,19 @@ public class RoleDTO implements Serializable {
 		this.status = status;
 	}
 
-	public Timestamp getEffectiveDate() {
+	public Date getEffectiveDate() {
 		return effectiveDate;
 	}
 
-	public void setEffectiveDate(Timestamp effectiveDate) {
+	public void setEffectiveDate(Date effectiveDate) {
 		this.effectiveDate = effectiveDate;
 	}
 
-	public Timestamp getExpiryDate() {
+	public Date getExpiryDate() {
 		return expiryDate;
 	}
 
-	public void setExpiryDate(Timestamp expiryDate) {
+	public void setExpiryDate(Date expiryDate) {
 		this.expiryDate = expiryDate;
 	}
-	
-	
-
 }
