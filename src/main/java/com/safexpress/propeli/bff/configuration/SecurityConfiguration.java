@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 
-import org.apache.shiro.authz.Authorizer;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -59,29 +58,12 @@ public class SecurityConfiguration {
 		return realm;
 	}
 
-	@Bean
-	public Authorizer authorizer() {
-		CustomRealm realm = new CustomRealm();
-		realm.setAuthenticationCachingEnabled(true);
-		realm.setAuthorizationCachingEnabled(true);
-		realm.setCacheManager(cacheManager());
-		return realm;
-	}
-
-//	@Bean
-//	public DefaultWebSecurityManager authenticator() {
-//		DefaultWebSecurityManager securityMgr = new DefaultWebSecurityManager(realm());
-//		securityMgr.setCacheManager(cacheManager());
-//		securityMgr.setSessionManager(sessionManager());
-//		return securityMgr;
-//	}
 
 	@Bean
 	public DefaultWebSecurityManager securityManager() {
 		DefaultWebSecurityManager securityMgr = new DefaultWebSecurityManager(realm());
 		securityMgr.setCacheManager(cacheManager());
 		securityMgr.setSessionManager(sessionManager());
-		securityMgr.setAuthorizer(authorizer());
 		return securityMgr;
 	}
 
