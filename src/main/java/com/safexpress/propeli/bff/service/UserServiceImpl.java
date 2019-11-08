@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
         String object = "lookUp";
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
             lookUpResponse = restTemplate.exchange(
-                    new URI(lookUpUrl + "/lookUpValueByLookUpType/USER_CTGY" ), HttpMethod.GET, entity,
+                    new URI(lookUpUrl + "lookUpValue/lookupType/USER_CTGY" ), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
