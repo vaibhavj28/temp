@@ -2,19 +2,21 @@ microapp:
   microId: common-bff
 
 server:
-  port: 80
+  port: 9100
 
 # Core Services url
 service:
   authnz:
-    host: ${AUTHNZ_HOST:172.20.70.140}
-    port: ${AUTHNZ_PORT:80}  
+    protocol: http://
+    host: ${AUTHNZ_HOST:10.1.233.48}
+    port: ${AUTHNZ_PORT::9069}
     uri: /v1  
+    url: ${service.authnz.protocol}${service.authnz.host}${service.authnz.port}${service.authnz.uri}
      
   mdmUserManagement:
      protocol: http://
-     host: ${USER_MANAGEMENT_HOST:172.20.224.222}
-     port: ${USER_MANAGEMENT_PORT::80}
+     host: ${USER_MANAGEMENT_HOST:127.0.0.1}
+     port: ${USER_MANAGEMENT_PORT::9095}
      objects_uri: /objects/
      users_uri: /users/
      roles_uri: /roles/
@@ -25,14 +27,14 @@ service:
      mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}
 
   lookUpNotepadCommandmentService:
-      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:172.20.203.28}
-      port: ${LOOKUP_NOTEPAD_COMMANDMENT_PORT::80}
+      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:127.0.0.1}
+      port: ${LOOKUP_NOTEPAD_COMMANDMENT_PORT::9096}
       version: /v1
       lookUp_uri: /mdm/
       look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.version}${service.lookUpNotepadCommandmentService.lookUp_uri}
   branchService:
-      host: ${BRANCH_HOST:172.20.102.86}
-      port: ${BRANCH_PORT::80}
+      host: ${BRANCH_HOST:127.0.0.1}
+      port: ${BRANCH_PORT::9001}
       version: /v1/
       branch_uri: branches/
       branch_url: ${service.mdmUserManagement.protocol}${service.branchService.host}${service.branchService.port}${service.branchService.version}${service.branchService.branch_uri}
@@ -41,8 +43,8 @@ service:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 app:           
   redis:
-    host: ${REDIS_HOST:127.0.0.1}
-    password: ${REDIS_PASSWORD:admin}
+    host: ${REDIS_HOST:master.dev-private-propel-i-redis-ec.97ggud.aps1.cache.amazonaws.com}
+    password: ${REDIS_PASSWORD:XM2tK7PLaD3FV6NxATBt}
     port: ${REDIS_PORT:6379}
 ad:
   service:

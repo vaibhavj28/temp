@@ -2,6 +2,8 @@ package com.safexpress.propeli.bff.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Arun Singh
  * @ClassType DTO	
@@ -13,6 +15,8 @@ public class TokenDTO implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5324794093142868374L;
+	
+	@JsonProperty("access-token")
 	private String accessToken;
 
 	public TokenDTO() {

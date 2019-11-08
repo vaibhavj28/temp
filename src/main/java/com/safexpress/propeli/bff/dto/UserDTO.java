@@ -1,8 +1,6 @@
 package com.safexpress.propeli.bff.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.safexpress.propeli.bff.dto.RoleDTO;
-import com.safexpress.propeli.bff.dto.UserBranchMappingDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;

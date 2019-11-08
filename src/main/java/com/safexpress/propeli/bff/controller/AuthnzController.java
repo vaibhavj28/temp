@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.safexpress.propeli.bff.dto.CredentialDTO;
 import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
 import com.safexpress.propeli.bff.dto.TokenDTO;
+import com.safexpress.propeli.bff.exception.CommonBffException;
 import com.safexpress.propeli.bff.service.AuthnzService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * @author Ajay Singh Negi
@@ -44,43 +46,45 @@ public class AuthnzController {
 	private AuthnzService authnzService;
 	
 	@PostMapping("/v1/login")
-	public ResponseEntity<ResponseDTO> login(@Valid DFHeader header, @RequestBody CredentialDTO credentialDTO, HttpServletResponse response){
+	@ApiOperation(value = "Get access-token in cookie", notes = "Get access-token in cookie")
+	public ResponseEntity<ResponseDTO<Void>> login(@Valid DFHeader header, @RequestBody CredentialDTO credentialDTO, HttpServletResponse response){
 		
 		TokenDTO tokenDTO =authnzService.getToken(header, credentialDTO);
-		if(tokenDTO !=null) {
-			String token=tokenDTO.getAccessToken();
-			response.addCookie(authnzService.createCookie(token));
-		}
-			
-		
-		ResponseDTO responseDTO= new ResponseDTO();
-		responseDTO.setMessage("Success");
-			
+		String token=tokenDTO.getAccessToken();
+		response.addCookie(authnzService.createCookie(token));
+		ResponseDTO<Void> responseDTO= new ResponseDTO<>();
+		responseDTO.setMessage("User logged in. access-token returned in cookie");
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+		
 	}
 	
 	@PostMapping("/secure/v1/logout")
-	public ResponseEntity<Void> logout(@Valid DFHeader header){	
+	@ApiOperation(value = "Logout", notes = "Logout")
+	public ResponseEntity<ResponseDTO<Void>> logout(@Valid DFHeader header){	
 		authnzService.logout(header);
-		return ResponseEntity.status(HttpStatus.OK).build();
+		ResponseDTO<Void> responseDTO= new ResponseDTO<>();
+		responseDTO.setMessage("User logged out successfully");
+		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 	}
 	
 	@GetMapping("/secure/v1/menu")
-	public ResponseEntity<ResponseDTO> getUserMenu(@Valid DFHeader header){	
+	@ApiOperation(value = "Get menu details", notes = "Get menu details")
+	public ResponseEntity<ResponseDTO<List<MenuHierarchyDTO>>> getUserMenu(@Valid DFHeader header){	
 		
 		List<MenuHierarchyDTO> menu =authnzService.getUserMenu(header);
-		ResponseDTO responseDTO= new ResponseDTO();
-		responseDTO.setMessage("success");
+		ResponseDTO<List<MenuHierarchyDTO>> responseDTO= new ResponseDTO<>();
+		responseDTO.setMessage("Menu details retrieved successfully");
 		responseDTO.setData(menu);
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 	}
 	
 	@GetMapping("/secure/v1/permissions")
-	public ResponseEntity<ResponseDTO> getUserPermissions(@Valid DFHeader header){	
+	@ApiOperation(value = "Get user permissions details", notes = "Get user permissions details")
+	public ResponseEntity<ResponseDTO<Map<String, Object>>> getUserPermissions(@Valid DFHeader header){	
 		
 		Map<String, Object> permissions =authnzService.getAllPermissionsForUser(header);
-		ResponseDTO responseDTO= new ResponseDTO();
-		responseDTO.setMessage("success");
+		ResponseDTO<Map<String, Object>> responseDTO= new ResponseDTO<>();
+		responseDTO.setMessage("User permissions fetched successfully");
 		responseDTO.setData(permissions);
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 	}
