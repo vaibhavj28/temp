@@ -7,13 +7,13 @@ server:
 # Core Services url
 service:
   authnz:
-    host: ${AUTHNZ_HOST:172.20.12.133}
+    host: ${AUTHNZ_HOST:172.20.70.140}
     port: ${AUTHNZ_PORT:80}  
     uri: /v1  
      
   mdmUserManagement:
      protocol: http://
-     host: ${USER_MANAGEMENT_HOST:172.20.196.188}
+     host: ${USER_MANAGEMENT_HOST:172.20.224.222}
      port: ${USER_MANAGEMENT_PORT::80}
      objects_uri: /objects/
      users_uri: /users/
@@ -25,13 +25,13 @@ service:
      mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}
 
   lookUpNotepadCommandmentService:
-      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:172.20.199.87}
+      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:172.20.203.28}
       port: ${LOOKUP_NOTEPAD_COMMANDMENT_PORT::80}
       version: /v1
       lookUp_uri: /mdm/
       look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.version}${service.lookUpNotepadCommandmentService.lookUp_uri}
   branchService:
-      host: ${BRANCH_HOST:172.20.132.57}
+      host: ${BRANCH_HOST:172.20.102.86}
       port: ${BRANCH_PORT::80}
       version: /v1/
       branch_uri: branches/
