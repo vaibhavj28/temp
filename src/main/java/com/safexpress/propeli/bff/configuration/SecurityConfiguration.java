@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 
-import org.apache.shiro.authz.Authorizer;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -59,29 +58,12 @@ public class SecurityConfiguration {
 		return realm;
 	}
 
-	@Bean
-	public Authorizer authorizer() {
-		CustomRealm realm = new CustomRealm();
-		realm.setAuthenticationCachingEnabled(true);
-		realm.setAuthorizationCachingEnabled(true);
-		realm.setCacheManager(cacheManager());
-		return realm;
-	}
-
-//	@Bean
-//	public DefaultWebSecurityManager authenticator() {
-//		DefaultWebSecurityManager securityMgr = new DefaultWebSecurityManager(realm());
-//		securityMgr.setCacheManager(cacheManager());
-//		securityMgr.setSessionManager(sessionManager());
-//		return securityMgr;
-//	}
 
 	@Bean
 	public DefaultWebSecurityManager securityManager() {
 		DefaultWebSecurityManager securityMgr = new DefaultWebSecurityManager(realm());
 		securityMgr.setCacheManager(cacheManager());
 		securityMgr.setSessionManager(sessionManager());
-		securityMgr.setAuthorizer(authorizer());
 		return securityMgr;
 	}
 
@@ -93,39 +75,21 @@ public class SecurityConfiguration {
 		return sessionManager;
 	}
 
-//	@Bean
-//	public SessionFilter sessionFilter() {
-//		return new SessionFilter();
-//	}
+	@Bean
+	public SecurityFilter securityFilter() {
+		return new SecurityFilter();
+	}
 
-//	@Bean
-//	public SecurityFilter securityFilter() {
-//		return new SecurityFilter();
-//	}
-//
-//	@Bean
-//	public AuthFilter authFilter() {
-//		return new AuthFilter();
-//	}
-//
-//	@Bean
-//	public BranchAuthFilter branchAuthFilter() {
-//		return new BranchAuthFilter();
-//	}
+	@Bean
+	public AuthFilter authFilter() {
+		return new AuthFilter();
+	}
 
 	@Bean
 	public SessionDAO sessionDAO() {
 		return new EnterpriseCacheSessionDAO();
 	}
 
-//	@Bean
-//	public ShiroFilterChainDefinition shiroFilterChainDefinition() {
-//		DefaultShiroFilterChainDefinition filter = new DefaultShiroFilterChainDefinition();
-//		filter.addPathDefinition("/**", "anon");
-//		filter.addPathDefinition("/secure/*", "authc");
-//		filter.addPathDefinition("/secure/*", "sessionFilter");
-//		return filter;
-//	}
 
 	@Bean
 	public ShiroFilterFactoryBean shiroFilterFactoryBean() {
@@ -133,18 +97,17 @@ public class SecurityConfiguration {
 		shiroFilterFactoryBean.setSecurityManager(securityManager());
 		Map<String, Filter> filters= new HashMap<>();
 		filters.put("sessionFilter", new SessionFilter());
+		filters.put("branchAuthFilter", new BranchAuthFilter());
 		shiroFilterFactoryBean.setFilters(filters);
-		//shiroFilterFactoryBean.setFilterChainDefinitionMap(shiroFilterChainDefinition().getFilterChainMap());
 		Map<String, String> filterChainDefinitionMap= new HashMap<>();
-
+		// here url pattern is as per shiro
 		filterChainDefinitionMap.put("/**", "anon");
-		//filterChainDefinitionMap.put("/secure/*", "authc,sessionFilter");
-
+		filterChainDefinitionMap.put("/secure/**", "sessionFilter,branchAuthFilter");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 		return shiroFilterFactoryBean;
 	}
 
-	/*@Bean
+	@Bean
 	public FilterRegistrationBean<SecurityFilter> securityFilterRegisterationBean() {
 
 	    FilterRegistrationBean<SecurityFilter> registration = new FilterRegistrationBean<>();
@@ -160,22 +123,12 @@ public class SecurityConfiguration {
 
 	    FilterRegistrationBean<AuthFilter> registration = new FilterRegistrationBean<>();
 	    registration.setFilter(authFilter());
-	    registration.addUrlPatterns("/secure");
+	    registration.addUrlPatterns("/secure/*"); // url pattern is as per servlet specification
 	    registration.setName(AuthUtil.filterTypeEnum.AUTH_FILTER.value());
 	    // filter order should be set as per the requirement
 	    registration.setOrder(1);
 	    return registration;
 	}
 
-	@Bean
-	public FilterRegistrationBean<BranchAuthFilter> branchAuthFilterRegisterationBean() {
 
-	    FilterRegistrationBean<BranchAuthFilter> registration = new FilterRegistrationBean<>();
-	    registration.setFilter(branchAuthFilter());
-	    registration.addUrlPatterns("/secure");
-	    registration.setName(AuthUtil.filterTypeEnum.BRANCH_AUTH_FILTER.value());
-	    // filter order should be set as per the requirement
-	    registration.setOrder(3);
-	    return registration;
-	}*/
 }
