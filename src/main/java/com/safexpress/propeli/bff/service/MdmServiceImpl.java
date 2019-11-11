@@ -113,7 +113,7 @@ public class MdmServiceImpl implements MdmService {
 		String lookUpObject = "lookUp";
 		if (CommonBFFUtil.isPermitted(header, lookUpObject, AuthUtil.permissionTypeEnum.GET)) {
 				lookUpChannels = restTemplate.exchange(
-						new URI(lookUpUrl + "/lookUpValueByLookUpType/CHANNEL"), HttpMethod.GET, entity,
+						new URI(lookUpUrl + "lookUpValue/lookupType/CHANNEL"), HttpMethod.GET, entity,
 						new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
 						}).getBody();
 		}
@@ -191,7 +191,7 @@ public class MdmServiceImpl implements MdmService {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("lookupType", lookupType);
 			List<LookUpDTO> lookUpDTOs = new ArrayList<>();
-			URI uri = UriComponentsBuilder.fromUriString(lookUpUrl + "lookupValue/lookupType/{lookupType}").buildAndExpand(params).toUri();
+			URI uri = UriComponentsBuilder.fromUriString(lookUpUrl + "lookUpValue/lookupType/{lookupType}").buildAndExpand(params).toUri();
 			if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
 				lookUpDTOs = restTemplate.exchange(uri, HttpMethod.GET, entity,
 						new ParameterizedTypeReference<List<LookUpDTO>>() {
