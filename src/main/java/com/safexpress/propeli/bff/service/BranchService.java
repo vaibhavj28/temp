@@ -20,9 +20,11 @@ public interface BranchService {
 
     Response<BranchDTO> getBranchDetailsByCriteria(DFHeader header, String searchCriteria, String criteriaValue) throws Exception;
 
-    Response<BranchDTO> getAllBranch(DFHeader header);
+    Response<BranchDTO> getAllBranch(DFHeader header) throws Exception;
 
     Response<HierarchyBranchListDTO> getBranchHierarchyDetails(DFHeader header, List<UserBranchMappingDTO> branchList ) throws Exception ;
 
-    Response<BranchDTO> getBranchByName(DFHeader header, String branchName);
+    Response<BranchDTO> getBranchByName(DFHeader header, String branchName) throws Exception;
+
+    Response<String> getAllBranchesTypes(DFHeader header) throws Exception;
 }

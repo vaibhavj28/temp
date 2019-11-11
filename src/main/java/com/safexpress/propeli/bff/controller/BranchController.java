@@ -50,7 +50,7 @@ public class BranchController {
 
     @ApiOperation(value = "Branch List Details sorted alphabetically by branchName", notes = "Get a list of all Branch Details, alphabetically sorted by branchName ")
     @GetMapping()
-    public ResponseEntity<Response<BranchDTO>> getAllBranches(DFHeader header) {
+    public ResponseEntity<Response<BranchDTO>> getAllBranches(DFHeader header) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(service.getAllBranch(header));
     }
 
@@ -58,8 +58,15 @@ public class BranchController {
 
     @ApiOperation(value = "Get list of branches with wildSearch", notes = "Get list of branches by wildSearch on branch name")
     @GetMapping("branchName/{branchName}")
-    public ResponseEntity<Response<BranchDTO>> getAllBranchesWithBranchName(@Valid DFHeader header, @PathVariable("branchName") String branchName) {
+    public ResponseEntity<Response<BranchDTO>> getAllBranchesWithBranchName(@Valid DFHeader header, @PathVariable("branchName") String branchName) throws Exception{
         return ResponseEntity.status(HttpStatus.OK).body(service.getBranchByName(header, branchName));
+    }
+
+
+    @ApiOperation(value = "Get list of all types of branches", notes = "Get list of all types of branches")
+    @GetMapping("types")
+    public ResponseEntity<Response<String>> getAllBranchesTypes(@Valid DFHeader header) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getAllBranchesTypes(header));
     }
 
 }

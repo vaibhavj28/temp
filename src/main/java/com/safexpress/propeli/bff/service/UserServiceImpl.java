@@ -1,7 +1,8 @@
 package com.safexpress.propeli.bff.service;
 
-import com.safexpress.propeli.bff.configuration.CommonBFFUtil;
+import com.safexpress.propeli.bff.constants.CommonBFFConstant;
 import com.safexpress.propeli.bff.dto.*;
+import com.safexpress.propeli.bff.utility.CommonBFFUtil;
 import com.safexpress.propeli.security.util.AuthUtil;
 import com.safexpress.propeli.servicebase.exception.ServiceException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
@@ -70,8 +71,20 @@ public class UserServiceImpl implements UserService {
      * <p>
      * }
      **/
+
+    /**
+     * This method will save the details of new user
+     *
+     * @param header  DFHeader
+     * @param newUser UserDTO
+     * @return String
+     * @throws Exception exception
+     */
     public String saveUser(DFHeader header, UserDTO newUser) throws Exception {
         try {
+            if (!Boolean.parseBoolean(header.getIsAdmin())) {
+                newUser.setIsAdmin(null);
+            }
             Map<String, String> response = new HashMap<>();
             String object = usersUri.replace("/", "");
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.POST)) {
@@ -87,6 +100,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * This method will get the user details based on user id
+     *
+     * @param header DFHeader
+     * @param userId String
+     * @return Response<UserDTO>
+     * @throws Exception exception
+     */
     @Override
     public Response<UserDTO> getUser(DFHeader header, String userId) throws Exception {
         try {
@@ -99,6 +120,9 @@ public class UserServiceImpl implements UserService {
             }
             Response<UserDTO> responseDTO = new Response<>();
             List<UserDTO> userList = new ArrayList<>();
+            if (!Boolean.parseBoolean(header.getIsAdmin())) {
+                userDTO.ifPresent(dto -> dto.setIsAdmin(null));
+            }
             userDTO.ifPresent(userList::add);
             responseDTO.setData(userList);
             List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
@@ -120,6 +144,8 @@ public class UserServiceImpl implements UserService {
 
 
     /**
+     * This method will call the branch micro service to get the master data of branches
+     *
      * @param header  DFHeader
      * @param entity  HttpEntity<DFHeader>
      * @param userDTO UserDTO
@@ -130,7 +156,7 @@ public class UserServiceImpl implements UserService {
         BranchDTO branchDTO = null;
         String object = branchUri.replace("/", "");
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-            ResponseEntity<BranchDTO> response = restTemplate.exchange(new URI(branchUrl + "/branchCode/" + userDTO.getDefaultBranch().getBranchCode()),
+            ResponseEntity<BranchDTO> response = restTemplate.exchange(new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userDTO.getDefaultBranch().getBranchCode()),
                     HttpMethod.GET, entity, BranchDTO.class);
             branchDTO = response.getBody();
         }
@@ -138,6 +164,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method will call the micro service of lookService to show the master data of look up details
+     *
      * @param header header
      * @param entity HttpEntity<DFHeader>
      * @return ResponseEntity<List < LookUpMDMDTO>>
@@ -148,7 +176,7 @@ public class UserServiceImpl implements UserService {
         String object = "lookUp";
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
             lookUpResponse = restTemplate.exchange(
-                    new URI(lookUpUrl + "/lookUpValueByLookUpType/USER_CTGY" ), HttpMethod.GET, entity,
+                    new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + CommonBFFConstant.USER_CATEGORY_CHANNEL), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
@@ -157,6 +185,8 @@ public class UserServiceImpl implements UserService {
 
 
     /**
+     * This method will return the privilege branches
+     *
      * @param header DFHeader
      * @param userId String
      * @return Response<UserBranchMappingDTO>
@@ -170,7 +200,7 @@ public class UserServiceImpl implements UserService {
             List<UserBranchMappingDTO> userBranchMappingDTOs = new ArrayList<>();
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
                 userBranchMappingDTOs = restTemplate.exchange(
-                        new URI(usersUrl + userId + "/previlegeBranchCodes"), HttpMethod.GET, entity,
+                        new URI(usersUrl + userId + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI), HttpMethod.GET, entity,
                         new ParameterizedTypeReference<List<UserBranchMappingDTO>>() {
                         }).getBody();
             }
@@ -179,7 +209,7 @@ public class UserServiceImpl implements UserService {
             for (UserBranchMappingDTO userBranchMapping : Objects.requireNonNull(userBranchMappingDTOs)) {
                 BranchDTO branchDTO = null;
                 if (CommonBFFUtil.isPermitted(header, branchObject, AuthUtil.permissionTypeEnum.GET)) {
-                    branchDTO = restTemplate.exchange(new URI(branchUrl + "/branchCode/" + userBranchMapping.getBranchCode()), HttpMethod.GET, entity, BranchDTO.class)
+                    branchDTO = restTemplate.exchange(new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userBranchMapping.getBranchCode()), HttpMethod.GET, entity, BranchDTO.class)
                             .getBody();
                 }
                 branchDTOs.add(branchDTO);
@@ -198,6 +228,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method will return all the user roles
+     *
      * @param header DFHeader
      * @param userId String
      * @return Response<RoleDTO>
@@ -211,7 +243,7 @@ public class UserServiceImpl implements UserService {
             HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
             List<RoleDTO> roles = new ArrayList<>();
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                roles = restTemplate.exchange(new URI(usersUrl + userId + "/roles"),
+                roles = restTemplate.exchange(new URI(usersUrl + userId + CommonBFFConstant.GET_ROLES_URI),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<RoleDTO>>() {
                         }).getBody();
             }
@@ -228,6 +260,8 @@ public class UserServiceImpl implements UserService {
 
 
     /**
+     * This method will return all the users
+     *
      * @param header DFHeader
      * @return Response<UserDTO>
      * @throws Exception exception
@@ -258,6 +292,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method will update the user
+     *
      * @param header      DFHeader
      * @param updatedUser UserDTO
      * @return String
@@ -266,6 +302,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public String updateUser(DFHeader header, UserDTO updatedUser) throws Exception {
         try {
+            if (!Boolean.parseBoolean(header.getIsAdmin())) {
+                updatedUser.setIsAdmin(null);
+            }
             String object = usersUri.replace("/", "");
             Map<String, String> result = new HashMap<>();
             HttpEntity<UserDTO> entity = new HttpEntity<>(updatedUser, BaseUtil.payload(header));
@@ -281,6 +320,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Ths method will update the user privilege branches
+     *
      * @param header            DFHeader
      * @param userId            String
      * @param idKey             String
@@ -299,7 +340,7 @@ public class UserServiceImpl implements UserService {
             Map<String, String> result = null;
             params.put("userId", userId);
             params.put("idKey", idKey);
-            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}/previlegeBranchCodes")
+            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}" + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI_FOR_USER)
                     .buildAndExpand(params).toUri();
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.PUT)) {
                 result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
@@ -315,6 +356,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method will update the user roles
+     *
      * @param header    DFHeader
      * @param userId    String
      * @param idKey     String
@@ -334,7 +377,7 @@ public class UserServiceImpl implements UserService {
             Map<String, String> result = new HashMap<>();
             params.put("userId", userId);
             params.put("idKey", idKey);
-            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}/roles")
+            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}" + CommonBFFConstant.GET_ROLES_URI)
                     .buildAndExpand(params).toUri();
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.PUT)) {
                 result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
@@ -349,6 +392,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method will get the list on last N updated users
+     *
      * @param header DFHeader
      * @param number int
      * @return Response<UserDTO>
@@ -360,7 +405,7 @@ public class UserServiceImpl implements UserService {
             Response<UserDTO> response = new Response<>();
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                ResponseEntity<List<UserDTO>> userDTOs = restTemplate.exchange(new URI(usersUrl + "lastUpdated/"+
+                ResponseEntity<List<UserDTO>> userDTOs = restTemplate.exchange(new URI(usersUrl + "lastUpdated/" +
                                 number), HttpMethod.GET,
                         entity, new ParameterizedTypeReference<List<UserDTO>>() {
                         });

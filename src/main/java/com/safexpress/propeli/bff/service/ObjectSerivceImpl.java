@@ -1,10 +1,13 @@
 package com.safexpress.propeli.bff.service;
 
-import com.safexpress.propeli.bff.configuration.CommonBFFUtil;
+import com.safexpress.propeli.bff.constants.CommonBFFConstant;
+import com.safexpress.propeli.bff.utility.CommonBFFUtil;
 import com.safexpress.propeli.bff.dto.*;
 import com.safexpress.propeli.security.util.AuthUtil;
+import com.safexpress.propeli.servicebase.exception.ServiceException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 import com.safexpress.propeli.servicebase.util.BaseUtil;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,6 +45,14 @@ public class ObjectSerivceImpl implements ObjectSerivce {
     @Value("${service.lookUpNotepadCommandmentService.look_up_url}")
     private String lookUpUrl;
 
+
+    /**
+     * This method will return the list of all the objects from the repo
+     *
+     * @param header DFHeader
+     * @return Response<ModuleObjectDTO>
+     * @throws Exception exception
+     */
     @Override
     public Response<ModuleObjectDTO> getAllObject(DFHeader header) throws Exception {
         try {
@@ -67,6 +78,8 @@ public class ObjectSerivceImpl implements ObjectSerivce {
     }
 
     /**
+     * This method will return the lookUp by channel Type
+     *
      * @param header DFHeader
      * @param entity HttpEntity<String> entity
      * @return List<LookUpMDMDTO>
@@ -77,12 +90,21 @@ public class ObjectSerivceImpl implements ObjectSerivce {
         String object = "lookUp";
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
             lookUpMDMDTO = restTemplate.exchange(
-                    new URI(lookUpUrl + "/lookUpValueByLookUpType/CHANNEL"), HttpMethod.GET, entity,
+                    new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + "CHANNEL"), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
         return lookUpMDMDTO;
     }
+
+    /**
+     * This method will return the module by objectId
+     *
+     * @param header   DFHeader
+     * @param objectId String
+     * @return ModuleObjectDTO
+     * @throws Exception
+     */
 
     @Override
     public ModuleObjectDTO getObjectById(DFHeader header, String objectId) throws Exception {
@@ -95,7 +117,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
                 URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/byId/{objectId}").buildAndExpand(params)
                         .toUri();
-                moduleObjectDTO=  restTemplate.exchange(uri, HttpMethod.GET, entity, ModuleObjectDTO.class).getBody();
+                moduleObjectDTO = restTemplate.exchange(uri, HttpMethod.GET, entity, ModuleObjectDTO.class).getBody();
             }
             return moduleObjectDTO;
         } catch (RestClientException e) {
@@ -103,6 +125,15 @@ public class ObjectSerivceImpl implements ObjectSerivce {
         }
     }
 
+
+    /**
+     * This method will return the look up by object Namez
+     *
+     * @param header     DFHeader
+     * @param objectName String
+     * @return Response<ModuleObjectDTO>
+     * @throws Exception excpetion
+     */
     @Override
     public Response<ModuleObjectDTO> getObjectByName(DFHeader header, String objectName) throws Exception {
         try {
@@ -126,10 +157,22 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             response.setData(moduleObjectDTOS);
             response.setMessage(successMessage);
             return response;
-        } catch (RestClientException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (RestClientResponseException e) {
+            JSONObject error = CommonBFFUtil.handleError(e);
+            String description = error.get("description").toString().replace("ServiceException:", "");
+            throw new ServiceException("ERROR01", description, Integer.parseInt(error.has("status") ? (error.get("status").toString()) : "500"));
         }
     }
+
+
+    /**
+     * This method will return the sections
+     *
+     * @param header DFHeader
+     * @param menuId long
+     * @return Response<EntityDTO>
+     * @throws Exception exception
+     */
 
     @Override
     public Response<EntityDTO> getSectionList(DFHeader header, long menuId) throws Exception {
@@ -156,6 +199,8 @@ public class ObjectSerivceImpl implements ObjectSerivce {
     }
 
     /**
+     * This method will return the last N updated objects
+     *
      * @param header DFHeader
      * @param number int
      * @return Response<ModuleObjectDTO>

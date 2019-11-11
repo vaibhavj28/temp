@@ -45,7 +45,7 @@ public class UserDTO implements Serializable {
 	@Size(max = 100, message = "Description must be below 100 characters long")
 	private String description;
 	@ApiModelProperty(value="User admin property", notes = "1 means user is super admin and 0 means user is not")
-	private int isAdmin;
+	private Integer isAdmin;
 	@ApiModelProperty(value="User Menu Hierachy id", notes="Menu Hierachy id must only be in digits")
 	@NotNull(message = "Menu Hierarchy cannot be null")
 	private int menuHierarchyId;
@@ -127,11 +127,11 @@ public class UserDTO implements Serializable {
 		this.status = status;
 	}
 
-	public int getIsAdmin() {
+	public Integer getIsAdmin() {
 		return isAdmin;
 	}
 
-	public void setIsAdmin(int isAdmin) {
+	public void setIsAdmin(Integer isAdmin) {
 		this.isAdmin = isAdmin;
 	}
 
