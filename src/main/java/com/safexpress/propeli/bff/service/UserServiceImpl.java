@@ -82,6 +82,8 @@ public class UserServiceImpl implements UserService {
      */
     public String saveUser(DFHeader header, UserDTO newUser) throws Exception {
         try {
+            //TO-DO REMOVE the setter during integration testing
+            header.setIsAdmin("true");
             if (!Boolean.parseBoolean(header.getIsAdmin())) {
                 newUser.setIsAdmin(null);
             }
@@ -120,6 +122,8 @@ public class UserServiceImpl implements UserService {
             }
             Response<UserDTO> responseDTO = new Response<>();
             List<UserDTO> userList = new ArrayList<>();
+            //TO-DO REMOVE the setter during integration testing
+            header.setIsAdmin("true");
             if (!Boolean.parseBoolean(header.getIsAdmin())) {
                 userDTO.ifPresent(dto -> dto.setIsAdmin(null));
             }
@@ -302,6 +306,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public String updateUser(DFHeader header, UserDTO updatedUser) throws Exception {
         try {
+            //TO-DO REMOVE the setter during integration testing
+            header.setIsAdmin("true");
             if (!Boolean.parseBoolean(header.getIsAdmin())) {
                 updatedUser.setIsAdmin(null);
             }
