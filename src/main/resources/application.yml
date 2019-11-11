@@ -15,7 +15,7 @@ service:
      
   mdmUserManagement:
      protocol: http://
-     host: ${USER_MANAGEMENT_HOST:172.20.162.169}
+     host: ${USER_MANAGEMENT_HOST:172.20.82.153}
      port: ${USER_MANAGEMENT_PORT::80}
      objects_uri: /objects/
      users_uri: /users/
