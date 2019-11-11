@@ -77,7 +77,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
         String object = "lookUp";
         if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
             lookUpMDMDTO = restTemplate.exchange(
-                    new URI(lookUpUrl + "lookupValue/lookupType/CHANNEL"), HttpMethod.GET, entity,
+                    new URI(lookUpUrl + "lookUpValue/lookupType/CHANNEL"), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
