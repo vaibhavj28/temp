@@ -34,7 +34,7 @@ service:
       look_up_url: ${service.mdmUserManagement.protocol}${service.lookUpNotepadCommandmentService.host}${service.lookUpNotepadCommandmentService.port}${service.lookUpNotepadCommandmentService.version}${service.lookUpNotepadCommandmentService.lookUp_uri}
   branchService:
       host: ${BRANCH_HOST:127.0.0.1}
-      port: ${BRANCH_PORT::9001}
+      port: ${BRANCH_PORT::9097}
       version: /v1/
       branch_uri: branches/
       branch_url: ${service.mdmUserManagement.protocol}${service.branchService.host}${service.branchService.port}${service.branchService.version}${service.branchService.branch_uri}

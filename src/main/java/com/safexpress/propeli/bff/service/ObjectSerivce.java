@@ -1,11 +1,10 @@
 package com.safexpress.propeli.bff.service;
 
 import com.safexpress.propeli.bff.dto.EntityDTO;
+import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
 import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
 import com.safexpress.propeli.bff.dto.Response;
 import com.safexpress.propeli.servicebase.model.DFHeader;
-
-import java.util.List;
 
 public interface ObjectSerivce {
 	
@@ -53,5 +52,7 @@ public interface ObjectSerivce {
 	Response<EntityDTO> getSectionList(DFHeader header,long menuId) throws Exception;
 
 	Response<ModuleObjectDTO> getLastNUpdatedObjects(DFHeader header, int number) throws Exception;
+	
+	Response<MenuHierarchyDTO> getMenuHierarchy(DFHeader header) throws Exception;
 
 }

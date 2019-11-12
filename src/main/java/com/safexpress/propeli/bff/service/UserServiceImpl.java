@@ -1,12 +1,16 @@
 package com.safexpress.propeli.bff.service;
 
-import com.safexpress.propeli.bff.constants.CommonBFFConstant;
-import com.safexpress.propeli.bff.dto.*;
-import com.safexpress.propeli.bff.utility.CommonBFFUtil;
-import com.safexpress.propeli.security.util.AuthUtil;
-import com.safexpress.propeli.servicebase.exception.ServiceException;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-import com.safexpress.propeli.servicebase.util.BaseUtil;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,413 +24,419 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
+import com.safexpress.propeli.bff.constants.CommonBFFConstant;
+import com.safexpress.propeli.bff.dto.BranchDTO;
+import com.safexpress.propeli.bff.dto.LookUpMDMDTO;
+import com.safexpress.propeli.bff.dto.ReferenceDTO;
+import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.dto.RoleDTO;
+import com.safexpress.propeli.bff.dto.UserBranchMappingDTO;
+import com.safexpress.propeli.bff.dto.UserDTO;
+import com.safexpress.propeli.bff.utility.CommonBFFUtil;
+import com.safexpress.propeli.security.util.AuthUtil;
+import com.safexpress.propeli.servicebase.exception.ServiceException;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private RestTemplate restTemplate;
+	@Autowired
+	private RestTemplate restTemplate;
 
-    @Value("${service.branchService.branch_uri}")
-    private
-    String branchUri;
+	@Value("${service.branchService.branch_uri}")
+	private String branchUri;
 
-    @Value("${service.branchService.branch_url}")
-    String branchUrl;
+	@Value("${service.branchService.branch_url}")
+	String branchUrl;
 
-    @Value("${service.lookUpNotepadCommandmentService.look_up_url}")
-    String lookUpUrl;
+	@Value("${service.lookUpNotepadCommandmentService.look_up_url}")
+	String lookUpUrl;
 
-    @Value("${service.mdmUserManagement.users_url}")
-    String usersUrl;
+	@Value("${service.mdmUserManagement.users_url}")
+	String usersUrl;
 
-    @Value("${service.mdmUserManagement.users_uri}")
-    String usersUri;
+	@Value("${service.mdmUserManagement.users_uri}")
+	String usersUri;
 
-    @Autowired
-    UserBranchMappingDTO userBranchMappingDTO;
+	@Autowired
+	UserBranchMappingDTO userBranchMappingDTO;
 
-    @Value("${message.success}")
-    private
-    String successMessage;
+	@Value("${message.success}")
+	private String successMessage;
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    /**
-     * @Override public String addUser(DFHeader header, UserDTO newUser) throws Exception {
-     * <p>
-     * if(CollectionUtils.isEmpty(newUser.getUserRoles())){
-     * throw new ValidationException().businessErrorCode("1005")
-     * .businessErrorMessage("User Should be created with atleast one role")
-     * .error("User Id", "002", newUser.getUserId() + " " + "Does Not Have A Role Associated With It");
-     * }
-     * else
-     * return saveUser(header,newUser);
-     * <p>
-     * }
-     **/
+	/**
+	 * This method will save the details of new user
+	 *
+	 * @param header  DFHeader
+	 * @param newUser UserDTO
+	 * @return String
+	 * @throws Exception exception
+	 */
+	public String saveUser(DFHeader header, UserDTO user) throws Exception {
+		try {
+			UserDTO newUser = CommonBFFUtil.setAdminFieldForUser(header, user);
+			Map<String, String> response = new HashMap<>();
 
-    /**
-     * This method will save the details of new user
-     *
-     * @param header  DFHeader
-     * @param newUser UserDTO
-     * @return String
-     * @throws Exception exception
-     */
-    public String saveUser(DFHeader header, UserDTO newUser) throws Exception {
-        try {
-            //TO-DO REMOVE the setter during integration testing
-            header.setIsAdmin("true");
-            if (!Boolean.parseBoolean(header.getIsAdmin())) {
-                newUser.setIsAdmin(null);
-            }
-            Map<String, String> response = new HashMap<>();
-            String object = usersUri.replace("/", "");
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.POST)) {
-                HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, BaseUtil.payload(header));
-                response = restTemplate.exchange(new URI(usersUrl), HttpMethod.POST, entity, Map.class).getBody();
-                return response.get("responseMessage");
-            }
-            return "";
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: saveUser()" + e.getResponseBodyAsString());
-            String errorpayload = e.getResponseBodyAsString();
-            throw e;
-        }
-    }
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.POST)) {
+				HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, BaseUtil.payload(header));
+				response = restTemplate.exchange(new URI(usersUrl), HttpMethod.POST, entity, Map.class).getBody();
+			}
+			return response.get("responseMessage");
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: saveUser()" + e.getResponseBodyAsString());
+			throw e;
+		}
+	}
 
-    /**
-     * This method will get the user details based on user id
-     *
-     * @param header DFHeader
-     * @param userId String
-     * @return Response<UserDTO>
-     * @throws Exception exception
-     */
-    @Override
-    public Response<UserDTO> getUser(DFHeader header, String userId) throws Exception {
-        try {
-            String object = usersUri.replace("/", "");
-            HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-            Optional<UserDTO> userDTO = Optional.of(new UserDTO());
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                userDTO = Optional.ofNullable(restTemplate.exchange(new URI(usersUrl + userId), HttpMethod.GET, entity, UserDTO.class)
-                        .getBody());
-            }
-            Response<UserDTO> responseDTO = new Response<>();
-            List<UserDTO> userList = new ArrayList<>();
-            //TO-DO REMOVE the setter during integration testing
-            header.setIsAdmin("true");
-            if (!Boolean.parseBoolean(header.getIsAdmin())) {
-                userDTO.ifPresent(dto -> dto.setIsAdmin(null));
-            }
-            userDTO.ifPresent(userList::add);
-            responseDTO.setData(userList);
-            List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
-            BranchDTO branchDTO = getBranchDetails(header, entity, userDTO.get());
-            ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setCategoryList(lookUpResponse);
-            List<BranchDTO> branchDTOs = new ArrayList<>();
-            branchDTOs.add(branchDTO);
-            referenceDTO.setBranch(branchDTOs);
-            responseDTO.setRefernceList(referenceDTO);
-            responseDTO.setMessage(successMessage);
-            return responseDTO;
+	/**
+	 * This method will get the user details based on user id
+	 *
+	 * @param header DFHeader
+	 * @param userId String
+	 * @return Response<UserDTO>
+	 * @throws Exception exception
+	 */
+	@Override
+	public Response<UserDTO> getUser(DFHeader header, String userId) throws Exception {
+		try {
 
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: getUser()" + e.getResponseBodyAsString());
-            throw e;
-        }
-    }
+			UserDTO user = null;
+			Response<UserDTO> responseDTO = new Response<>();
+			List<UserDTO> userList = new ArrayList<>();
 
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.GET)) {
+				user = restTemplate.exchange(new URI(usersUrl + userId), HttpMethod.GET, entity, UserDTO.class)
+						.getBody();
+			}
 
-    /**
-     * This method will call the branch micro service to get the master data of branches
-     *
-     * @param header  DFHeader
-     * @param entity  HttpEntity<DFHeader>
-     * @param userDTO UserDTO
-     * @return BranchDTO
-     * @throws URISyntaxException Exception
-     */
-    private BranchDTO getBranchDetails(DFHeader header, HttpEntity<DFHeader> entity, UserDTO userDTO) throws URISyntaxException {
-        BranchDTO branchDTO = null;
-        String object = branchUri.replace("/", "");
-        if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-            ResponseEntity<BranchDTO> response = restTemplate.exchange(new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userDTO.getDefaultBranch().getBranchCode()),
-                    HttpMethod.GET, entity, BranchDTO.class);
-            branchDTO = response.getBody();
-        }
-        return branchDTO;
-    }
+			UserDTO userDTO = CommonBFFUtil.setAdminFieldForUser(header, user);
 
-    /**
-     * This method will call the micro service of lookService to show the master data of look up details
-     *
-     * @param header header
-     * @param entity HttpEntity<DFHeader>
-     * @return ResponseEntity<List < LookUpMDMDTO>>
-     * @throws URISyntaxException exception
-     */
-    private List<LookUpMDMDTO> getLookUpDetails(DFHeader header, HttpEntity<DFHeader> entity) throws URISyntaxException {
-        List<LookUpMDMDTO> lookUpResponse = new ArrayList<>();
-        String object = "lookUp";
-        if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-            lookUpResponse = restTemplate.exchange(
-                    new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + CommonBFFConstant.USER_CATEGORY_CHANNEL), HttpMethod.GET, entity,
-                    new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
-                    }).getBody();
-        }
-        return lookUpResponse;
-    }
+			userList.add(userDTO);
+			responseDTO.setData(userList);
+			List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
+			BranchDTO branchDTO = getBranchDetails(header, entity, userDTO);
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			referenceDTO.setCategoryList(lookUpResponse);
+			List<BranchDTO> branchDTOs = new ArrayList<>();
+			branchDTOs.add(branchDTO);
+			referenceDTO.setBranch(branchDTOs);
+			responseDTO.setRefernceList(referenceDTO);
+			responseDTO.setMessage(successMessage);
+			return responseDTO;
 
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: getUser()" + e.getResponseBodyAsString());
+			throw e;
+		}
+	}
 
-    /**
-     * This method will return the privilege branches
-     *
-     * @param header DFHeader
-     * @param userId String
-     * @return Response<UserBranchMappingDTO>
-     * @throws Exception exception
-     */
-    @Override
-    public Response<UserBranchMappingDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception {
-        try {
-            String object = usersUri.replace("/", "");
-            HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-            List<UserBranchMappingDTO> userBranchMappingDTOs = new ArrayList<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                userBranchMappingDTOs = restTemplate.exchange(
-                        new URI(usersUrl + userId + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI), HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<UserBranchMappingDTO>>() {
-                        }).getBody();
-            }
-            List<BranchDTO> branchDTOs = new ArrayList<>();
-            String branchObject = branchUri.replace("/", "");
-            for (UserBranchMappingDTO userBranchMapping : Objects.requireNonNull(userBranchMappingDTOs)) {
-                BranchDTO branchDTO = null;
-                if (CommonBFFUtil.isPermitted(header, branchObject, AuthUtil.permissionTypeEnum.GET)) {
-                    branchDTO = restTemplate.exchange(new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userBranchMapping.getBranchCode()), HttpMethod.GET, entity, BranchDTO.class)
-                            .getBody();
-                }
-                branchDTOs.add(branchDTO);
-            }
-            Response<UserBranchMappingDTO> response = new Response<>();
-            ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setBranch(branchDTOs);
-            response.setData(userBranchMappingDTOs);
-            response.setRefernceList(referenceDTO);
-            response.setMessage(successMessage);
-            return response;
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: getPrevilegeBranches() " + e.getResponseBodyAsString());
-            throw e;
-        }
-    }
+	/**
+	 * This method will call the branch micro service to get the master data of
+	 * branches
+	 *
+	 * @param header  DFHeader
+	 * @param entity  HttpEntity<DFHeader>
+	 * @param userDTO UserDTO
+	 * @return BranchDTO
+	 * @throws URISyntaxException Exception
+	 */
+	private BranchDTO getBranchDetails(DFHeader header, HttpEntity<DFHeader> entity, UserDTO userDTO)
+			throws URISyntaxException {
+		BranchDTO branchDTO = null;
+		if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
+			ResponseEntity<BranchDTO> response = restTemplate.exchange(new URI(
+					branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userDTO.getDefaultBranch().getBranchCode()),
+					HttpMethod.GET, entity, BranchDTO.class);
+			branchDTO = response.getBody();
+		}
+		return branchDTO;
+	}
 
-    /**
-     * This method will return all the user roles
-     *
-     * @param header DFHeader
-     * @param userId String
-     * @return Response<RoleDTO>
-     * @throws Exception exception
-     */
-    @Override
-    public Response<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception {
-        try {
-            String object = usersUri.replace("/", "");
-            Response<RoleDTO> response = new Response<>();
-            HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-            List<RoleDTO> roles = new ArrayList<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                roles = restTemplate.exchange(new URI(usersUrl + userId + CommonBFFConstant.GET_ROLES_URI),
-                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<RoleDTO>>() {
-                        }).getBody();
-            }
-            response.setData(roles);
-            ReferenceDTO referenceDTO = new ReferenceDTO();
-            response.setRefernceList(referenceDTO);
-            response.setMessage(successMessage);
-            return response;
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: editUser() {}", e.getResponseBodyAsString());
-            throw new ServiceException("", "", 780);
-        }
-    }
+	/**
+	 * This method will call the micro service of lookService to show the master
+	 * data of look up details
+	 *
+	 * @param header header
+	 * @param entity HttpEntity<DFHeader>
+	 * @return ResponseEntity<List < LookUpMDMDTO>>
+	 * @throws URISyntaxException exception
+	 */
+	private List<LookUpMDMDTO> getLookUpDetails(DFHeader header, HttpEntity<DFHeader> entity)
+			throws URISyntaxException {
+		
+		List<LookUpMDMDTO> lookUpResponse = new ArrayList<>();
+		String lookupUri = "lookUp";
+		
+		if (CommonBFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
+			lookUpResponse = restTemplate.exchange(
+					new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI
+							+ CommonBFFConstant.USER_CATEGORY_CHANNEL),
+					HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
+					}).getBody();
+		}
+		return lookUpResponse;
+	}
 
+	/**
+	 * This method will return the privilege branches
+	 *
+	 * @param header DFHeader
+	 * @param userId String
+	 * @return Response<UserBranchMappingDTO>
+	 * @throws Exception exception
+	 */
+	@Override
+	public Response<UserBranchMappingDTO> getPrevilegeBranches(DFHeader header, String userId) throws Exception {
+		try {
 
-    /**
-     * This method will return all the users
-     *
-     * @param header DFHeader
-     * @return Response<UserDTO>
-     * @throws Exception exception
-     */
-    @Override
-    public Response<UserDTO> getAllUsers(DFHeader header) throws Exception {
-        try {
-            String object = usersUri.replace("/", "");
-            HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-            List<UserDTO> userDTOs = new ArrayList<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                userDTOs = restTemplate.exchange(new URI(usersUrl), HttpMethod.GET,
-                        entity, new ParameterizedTypeReference<List<UserDTO>>() {
-                        }).getBody();
-            }
-            List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
-            ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setCategoryList(lookUpResponse);
-            Response<UserDTO> response = new Response<>();
-            response.setRefernceList(referenceDTO);
-            response.setData(userDTOs);
-            response.setMessage(successMessage);
-            return response;
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: getAllUsers() " + e.getResponseBodyAsString());
-            throw e;
-        }
-    }
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			List<UserBranchMappingDTO> userBranchMappingDTOs = new ArrayList<>();
+			List<BranchDTO> branchDTOs = new ArrayList<>();
 
-    /**
-     * This method will update the user
-     *
-     * @param header      DFHeader
-     * @param updatedUser UserDTO
-     * @return String
-     * @throws Exception exception
-     */
-    @Override
-    public String updateUser(DFHeader header, UserDTO updatedUser) throws Exception {
-        try {
-            //TO-DO REMOVE the setter during integration testing
-            header.setIsAdmin("true");
-            if (!Boolean.parseBoolean(header.getIsAdmin())) {
-                updatedUser.setIsAdmin(null);
-            }
-            String object = usersUri.replace("/", "");
-            Map<String, String> result = new HashMap<>();
-            HttpEntity<UserDTO> entity = new HttpEntity<>(updatedUser, BaseUtil.payload(header));
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.PUT)) {
-                result = restTemplate.exchange(new URI(usersUrl), HttpMethod.PUT, entity, Map.class).getBody();
-            }
-            return result.get("responseMessage");
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.GET)) {
+				userBranchMappingDTOs = restTemplate
+						.exchange(new URI(usersUrl + userId + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI),
+								HttpMethod.GET, entity, new ParameterizedTypeReference<List<UserBranchMappingDTO>>() {
+								})
+						.getBody();
+			}
 
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: editUser() " + e.getResponseBodyAsString());
-            throw e;
-        }
-    }
+			for (UserBranchMappingDTO userBranchMapping : Objects.requireNonNull(userBranchMappingDTOs)) {
+				BranchDTO branchDTO = null;
+				if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
+					branchDTO = restTemplate
+							.exchange(
+									new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI
+											+ userBranchMapping.getBranchCode()),
+									HttpMethod.GET, entity, BranchDTO.class)
+							.getBody();
+				}
+				branchDTOs.add(branchDTO);
+			}
+			Response<UserBranchMappingDTO> response = new Response<>();
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			referenceDTO.setBranch(branchDTOs);
+			response.setData(userBranchMappingDTOs);
+			response.setRefernceList(referenceDTO);
+			response.setMessage(successMessage);
+			return response;
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: getPrevilegeBranches() " + e.getResponseBodyAsString());
+			throw e;
+		}
+	}
 
-    /**
-     * Ths method will update the user privilege branches
-     *
-     * @param header            DFHeader
-     * @param userId            String
-     * @param idKey             String
-     * @param previlegeBranches List<UserBranchMappingDTO>
-     * @return String
-     * @throws Exception excpetion
-     */
-    @Override
-    public String updateUserPrevilegeBranches(DFHeader header, String userId, String idKey,
-                                              List<UserBranchMappingDTO> previlegeBranches) throws Exception {
+	/**
+	 * This method will return all the user roles
+	 *
+	 * @param header DFHeader
+	 * @param userId String
+	 * @return Response<RoleDTO>
+	 * @throws Exception exception
+	 */
+	@Override
+	public Response<RoleDTO> getUserRoles(DFHeader header, String userId) throws Exception {
+		try {
+			
+			Response<RoleDTO> response = new Response<>();
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			List<RoleDTO> roles = new ArrayList<>();
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.GET)) {
+				roles = restTemplate.exchange(new URI(usersUrl + userId + CommonBFFConstant.GET_ROLES_URI),
+						HttpMethod.GET, entity, new ParameterizedTypeReference<List<RoleDTO>>() {
+						}).getBody();
+			}
+			response.setData(roles);
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			response.setRefernceList(referenceDTO);
+			response.setMessage(successMessage);
+			return response;
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: editUser() {}", e.getResponseBodyAsString());
+			throw new ServiceException("", "", 780);
+		}
+	}
 
-        try {
-            String object = usersUri.replace("/", "");
-            HttpEntity<Object> entity = new HttpEntity<>(previlegeBranches, BaseUtil.payload(header));
-            Map<String, String> params = new HashMap<>();
-            Map<String, String> result = null;
-            params.put("userId", userId);
-            params.put("idKey", idKey);
-            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}" + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI_FOR_USER)
-                    .buildAndExpand(params).toUri();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.PUT)) {
-                result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
-                return result.get("responseMessage");
-            }
-            return "";
+	/**
+	 * This method will return all the users
+	 *
+	 * @param header DFHeader
+	 * @return Response<UserDTO>
+	 * @throws Exception exception
+	 */
+	@Override
+	public Response<UserDTO> getAllUsers(DFHeader header) throws Exception {
+		try {
+			
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			List<UserDTO> userDTOs = new ArrayList<>();
+			List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			Response<UserDTO> response = new Response<>();
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.GET)) {
+				userDTOs = restTemplate.exchange(new URI(usersUrl), HttpMethod.GET, entity,
+						new ParameterizedTypeReference<List<UserDTO>>() {
+						}).getBody();
+			}	
+			
+			List<UserDTO> userList  = userDTOs.stream().map(user -> CommonBFFUtil.setAdminFieldForUser(header, user)).collect(Collectors.toList());
+			
+			referenceDTO.setCategoryList(lookUpResponse);			
+			response.setRefernceList(referenceDTO);
+			response.setData(userList);
+			response.setMessage(successMessage);
+			return response;
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: getAllUsers() " + e.getResponseBodyAsString());
+			throw e;
+		}
+	}
 
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: updateUserPrevilegeBranches() " + e.getResponseBodyAsString());
-            throw e;
-        }
+	/**
+	 * This method will update the user
+	 *
+	 * @param header      DFHeader
+	 * @param updatedUser UserDTO
+	 * @return String
+	 * @throws Exception exception
+	 */
+	@Override
+	public String updateUser(DFHeader header, UserDTO user) throws Exception {
+		try {
+			
+			UserDTO updateUser = CommonBFFUtil.setAdminFieldForUser(header, user);
 
-    }
+			Map<String, String> result = new HashMap<>();
+			HttpEntity<UserDTO> entity = new HttpEntity<>(updateUser, BaseUtil.payload(header));
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.PUT)) {
+				result = restTemplate.exchange(new URI(usersUrl), HttpMethod.PUT, entity, Map.class).getBody();
+			}
+			return result.get("responseMessage");
 
-    /**
-     * This method will update the user roles
-     *
-     * @param header    DFHeader
-     * @param userId    String
-     * @param idKey     String
-     * @param userRoles List<RoleDTO>
-     * @return List<RoleDTO>
-     * @throws Exception exception
-     */
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: editUser() " + e.getResponseBodyAsString());
+			throw e;
+		}
+	}
 
-    @Override
-    public String updateUserRoles(DFHeader header, String userId, String idKey, List<RoleDTO> userRoles)
-            throws Exception {
+	/**
+	 * This method will update the user privilege branches
+	 *
+	 * @param header            DFHeader
+	 * @param userId            String
+	 * @param idKey             String
+	 * @param previlegeBranches List<UserBranchMappingDTO>
+	 * @return String
+	 * @throws Exception excpetion
+	 */
+	@Override
+	public String updateUserPrevilegeBranches(DFHeader header, String userId, String idKey,
+			List<UserBranchMappingDTO> previlegeBranches) throws Exception {
 
-        try {
-            String object = usersUri.replace("/", "");
-            HttpEntity<Object> entity = new HttpEntity<>(userRoles, BaseUtil.payload(header));
-            Map<String, String> params = new HashMap<String, String>();
-            Map<String, String> result = new HashMap<>();
-            params.put("userId", userId);
-            params.put("idKey", idKey);
-            URI uri = UriComponentsBuilder.fromUriString(usersUrl + "{userId}/{idKey}" + CommonBFFConstant.GET_ROLES_URI)
-                    .buildAndExpand(params).toUri();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.PUT)) {
-                result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
-            }
-            return result.get("responseMessage");
+		try {
+			
+			HttpEntity<Object> entity = new HttpEntity<>(previlegeBranches, BaseUtil.payload(header));
+			Map<String, String> params = new HashMap<>();
+			Map<String, String> result = null;
+			params.put("userId", userId);
+			params.put("idKey", idKey);
+			URI uri = UriComponentsBuilder
+					.fromUriString(
+							usersUrl + "{userId}/{idKey}" + CommonBFFConstant.PREVILLEGE_BRANCH_CODES_URI_FOR_USER)
+					.buildAndExpand(params).toUri();
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.PUT)) {
+				result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();				
+			}
+			return result.get("responseMessage");
 
-        } catch (RestClientResponseException e) {
-            log.error("Inside UserServiceImpl :: updateUserRoles() " + e.getResponseBodyAsString());
-            throw e;
-        }
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: updateUserPrevilegeBranches() " + e.getResponseBodyAsString());
+			throw e;
+		}
 
-    }
+	}
 
-    /**
-     * This method will get the list on last N updated users
-     *
-     * @param header DFHeader
-     * @param number int
-     * @return Response<UserDTO>
-     * @throws Exception exception
-     */
-    public Response<UserDTO> getLastNUpdatedUsers(DFHeader header, int number) throws Exception {
-        try {
-            String object = usersUri.replace("/", "");
-            Response<UserDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                ResponseEntity<List<UserDTO>> userDTOs = restTemplate.exchange(new URI(usersUrl + "lastUpdated/" +
-                                number), HttpMethod.GET,
-                        entity, new ParameterizedTypeReference<List<UserDTO>>() {
-                        });
-                List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
-                ReferenceDTO referenceDTO = new ReferenceDTO();
-                referenceDTO.setCategoryList(lookUpResponse);
-                response.setRefernceList(referenceDTO);
-                response.setData(userDTOs.getBody());
-                response.setMessage(successMessage);
-            }
-            return response;
-        } catch (RestClientResponseException e) {
-            InputStream body = new ByteArrayInputStream(e.getResponseBodyAsByteArray());
-            log.error("Inside UserServiceImpl :: editUser() {}", e.getResponseBodyAsString());
-            throw new ServiceException(body.toString(), "", 500);
-        }
-    }
+	/**
+	 * This method will update the user roles
+	 *
+	 * @param header    DFHeader
+	 * @param userId    String
+	 * @param idKey     String
+	 * @param userRoles List<RoleDTO>
+	 * @return List<RoleDTO>
+	 * @throws Exception exception
+	 */
+
+	@Override
+	public String updateUserRoles(DFHeader header, String userId, String idKey, List<RoleDTO> userRoles)
+			throws Exception {
+
+		try {
+			
+			HttpEntity<Object> entity = new HttpEntity<>(userRoles, BaseUtil.payload(header));
+			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> result = new HashMap<>();
+			params.put("userId", userId);
+			params.put("idKey", idKey);
+			URI uri = UriComponentsBuilder
+					.fromUriString(usersUrl + "{userId}/{idKey}" + CommonBFFConstant.GET_ROLES_URI)
+					.buildAndExpand(params).toUri();
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.PUT)) {
+				result = restTemplate.exchange(uri, HttpMethod.PUT, entity, Map.class).getBody();
+			}
+			return result.get("responseMessage");
+
+		} catch (RestClientResponseException e) {
+			log.error("Inside UserServiceImpl :: updateUserRoles() " + e.getResponseBodyAsString());
+			throw e;
+		}
+
+	}
+
+	/**
+	 * This method will get the list on last N updated users
+	 *
+	 * @param header DFHeader
+	 * @param number int
+	 * @return Response<UserDTO>
+	 * @throws Exception exception
+	 */
+	public Response<UserDTO> getLastNUpdatedUsers(DFHeader header, int number) throws Exception {
+		try {
+			
+			Response<UserDTO> response = new Response<>();
+			ReferenceDTO referenceDTO = new ReferenceDTO();
+			
+			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.GET)) {
+				HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+				ResponseEntity<List<UserDTO>> userDTOs = restTemplate.exchange(
+						new URI(usersUrl + "lastUpdated/" + number), HttpMethod.GET, entity,
+						new ParameterizedTypeReference<List<UserDTO>>() {
+						});
+				
+				List<UserDTO> userList  = userDTOs.getBody().stream().map(user -> CommonBFFUtil.setAdminFieldForUser(header, user)).collect(Collectors.toList());
+				
+				List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
+				
+				referenceDTO.setCategoryList(lookUpResponse);
+				response.setRefernceList(referenceDTO);
+				response.setData(userList);
+				response.setMessage(successMessage);
+			}
+			return response;
+		} catch (RestClientResponseException e) {
+			InputStream body = new ByteArrayInputStream(e.getResponseBodyAsByteArray());
+			log.error("Inside UserServiceImpl :: editUser() {}", e.getResponseBodyAsString());
+			throw new ServiceException(body.toString(), "", 500);
+		}
+	}
 }

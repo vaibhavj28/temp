@@ -37,9 +37,6 @@ public class BranchServiceImpl implements BranchService {
     private
     String branchUrl;
 
-    @Autowired
-    private UserBranchMappingDTO userBranchMappingDTO;
-
     @Value("${message.success}")
     private
     String successMessage;
@@ -61,14 +58,16 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public Response<BranchDTO> getLatestNBranches(DFHeader header, int numberOfBranch) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<BranchDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+            
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(new URI(branchUrl + "lastUpdated/" +
                                 numberOfBranch), HttpMethod.GET,
                         entity, new ParameterizedTypeReference<List<BranchDTO>>() {
                         });
+                
                 response.setData(branchDTOs.getBody());
                 response.setMessage(successMessage);
             }
@@ -92,13 +91,14 @@ public class BranchServiceImpl implements BranchService {
     public Response<BranchDTO> getBranchByCode(DFHeader header, String branchCode) throws Exception {
         Response<BranchDTO> result;
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<BranchDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+            
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 BranchDTO branchDTO = restTemplate.exchange(new URI(branchUrl + "branchCode/" + branchCode),
-                        HttpMethod.GET, entity, BranchDTO.class)
-                        .getBody();
+                        HttpMethod.GET, entity, BranchDTO.class).getBody();
+                
                 List<BranchDTO> branchDTOS = new ArrayList<>();
                 branchDTOS.add(branchDTO);
                 response.setData(branchDTOS);
@@ -126,13 +126,15 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public Response<BranchDTO> getBranchDetailsByCriteria(DFHeader header, String searchCriteria, String criteriaValue) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<BranchDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+            
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 ResponseEntity<List<BranchDTO>> branchDTO = restTemplate.exchange(new URI(branchUrl + searchCriteria + "/" + criteriaValue),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
                         });
+                
                 response.setData(branchDTO.getBody());
                 response.setMessage(successMessage);
             }
@@ -153,9 +155,10 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public Response<BranchDTO> getAllBranch(DFHeader header) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<BranchDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+           
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
                 ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(new URI(branchUrl),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
@@ -163,6 +166,7 @@ public class BranchServiceImpl implements BranchService {
                 response.setData(branchDTOs.getBody());
                 response.setMessage(successMessage);
             }
+            
             return response;
         } catch (RestClientResponseException exception) {
             JSONObject error = CommonBFFUtil.handleError(exception);
@@ -181,14 +185,16 @@ public class BranchServiceImpl implements BranchService {
      */
     public Response<HierarchyBranchListDTO> getBranchHierarchyDetails(DFHeader header, List<UserBranchMappingDTO> branchList) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<HierarchyBranchListDTO> response = new Response<>();
             HttpEntity<List<UserBranchMappingDTO>> entity = new HttpEntity<>(branchList, BaseUtil.payload(header));
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.POST)) {
+            
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.POST)) {
                 ResponseEntity<HierarchyBranchListDTO> branchHierarchies = restTemplate.exchange(new URI(branchUrl +
                                 "branchHierarchyDetails"),
                         HttpMethod.POST, entity, new ParameterizedTypeReference<HierarchyBranchListDTO>() {
                         });
+                
                 List<HierarchyBranchListDTO> hierarchyBranchListDTOS = new ArrayList<>();
                 hierarchyBranchListDTOS.add(branchHierarchies.getBody());
                 response.setData(hierarchyBranchListDTOS);
@@ -210,9 +216,10 @@ public class BranchServiceImpl implements BranchService {
      */
     public Response<BranchDTO> getBranchByName(DFHeader header, String branchName) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<BranchDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+           
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 List<BranchDTO> branchDTOs = restTemplate.exchange(new URI(branchUrl + branchName),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
@@ -220,6 +227,7 @@ public class BranchServiceImpl implements BranchService {
                 response.setData(branchDTOs);
                 response.setMessage(successMessage);
             }
+            
             return response;
         } catch (RestClientResponseException exception) {
             JSONObject error = CommonBFFUtil.handleError(exception);
@@ -237,9 +245,10 @@ public class BranchServiceImpl implements BranchService {
      */
     public Response<String> getAllBranchesTypes(DFHeader header) throws Exception {
         try {
-            String object = branchUri.replace("/", "");
+            
             Response<String> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, object, AuthUtil.permissionTypeEnum.GET)) {
+            
+            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 List<String> branchTypes = restTemplate.exchange(new URI(branchUrl + "types"),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<String>>() {
@@ -247,6 +256,7 @@ public class BranchServiceImpl implements BranchService {
                 response.setData(branchTypes);
                 response.setMessage(successMessage);
             }
+            
             return response;
         } catch (RestClientResponseException exception) {
             JSONObject error = CommonBFFUtil.handleError(exception);

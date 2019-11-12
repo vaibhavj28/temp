@@ -20,7 +20,7 @@ import javax.validation.Valid;
 @Api(value = "Branch MDM BFF Controller")
 @SFXApi
 @RestController
-@RequestMapping("/secure/v1/branches/")
+@RequestMapping("/secure/v1/branches")
 public class BranchController {
     @Autowired
     private BranchService service;

@@ -18,26 +18,26 @@ import javax.validation.Valid;
 @Api(value = "User Management MDM BFF Controller")
 @SFXApi
 @RestController
-@RequestMapping("/secure/um/v1/")
+@RequestMapping("/secure/v1/roles")
 public class MdmController {
 
 	@Autowired
 	private MdmService service;
 
 	@ApiOperation(value = "Fetches all Roles")
-	@GetMapping("roles")
+	@GetMapping
 	public ResponseEntity<Response<RoleDTO>> getAllRoles(@Valid DFHeader header) throws Exception {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getAllRoles(header));
 	}
 
 	@ApiOperation(value = "Fetches Permissions of a Role")
-	@GetMapping("roles/{roleId}/permissions")
+	@GetMapping("{roleId}/permissions")
 	public ResponseEntity<Response<RolePermissionDTO>> getRolePermission(@Valid DFHeader header, @PathVariable long roleId) throws Exception {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getRolePermission(header, roleId));
 	}
 
 	@ApiOperation(value = "Creates A Role with permissions")
-	@PostMapping("roles")
+	@PostMapping
 	public ResponseEntity<ResponseDTO> createRolePermission(@Valid DFHeader header,
 			@ApiParam(value = "Role data to be inserted", required = true) @Valid @RequestBody RolePermissionDTO roleDetail) throws Exception{
 
@@ -46,7 +46,7 @@ public class MdmController {
 	}
 	
 	@ApiOperation(value = "Updates A Role with permissions")
-	@PutMapping("roles")
+	@PutMapping
 	public ResponseEntity<ResponseDTO> updateRolePermission(@Valid DFHeader header,
 			@ApiParam(value = "Role data to be updated", required = true) @Valid @RequestBody RolePermissionDTO roleDetail) {
 		ResponseDTO responseDTO = new ResponseDTO();
@@ -63,14 +63,8 @@ public class MdmController {
 		return ResponseEntity.status(HttpStatus.OK).body(service.lookupData(header, lookupType));
 	}
 
-	@ApiOperation(value = "Menu Hierarchy List Details", notes = "Get a list of all Menu Hierarchies")
-	@GetMapping(path = "objects/menuHierarchies", produces = "application/json")
-	public ResponseEntity<Response<MenuHierarchyDTO>> getMenuHierarchy(DFHeader header) throws Exception {
-		return ResponseEntity.status(HttpStatus.OK).body(service.getMenuHierarchy(header));
-	}
-
 	@ApiOperation(value = "Get last n updated Role  Details", notes = "Get a list of all Role Details")
-	@GetMapping("roles/lastUpdated/{number}")
+	@GetMapping("lastUpdated/{number}")
 	public ResponseEntity<Response<RoleDTO>> getLastNUpdatedRoles(@Valid DFHeader header,
 																  @PathVariable int number) throws Exception {
 		return ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedRoles(header, number));

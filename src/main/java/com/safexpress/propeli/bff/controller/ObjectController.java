@@ -1,13 +1,7 @@
 package com.safexpress.propeli.bff.controller;
 
-import com.safexpress.propeli.bff.dto.EntityDTO;
-import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
-import com.safexpress.propeli.bff.dto.Response;
-import com.safexpress.propeli.bff.service.ObjectSerivce;
-import com.safexpress.propeli.servicebase.annotation.SFXApi;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +10,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import com.safexpress.propeli.bff.dto.MenuHierarchyDTO;
+import com.safexpress.propeli.bff.dto.ModuleObjectDTO;
+import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.service.ObjectSerivce;
+import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Object Operation service", tags = "Object Operation service", description = "Object Operation service")
 @RestController
 @SFXApi
-@RequestMapping("/secure/um/v1")
+@RequestMapping("/secure/v1/objects")
 public class ObjectController {
 
     @Autowired
@@ -43,7 +45,7 @@ public class ObjectController {
      */
 
     @ApiOperation(value = "Object List Details", notes = "Get a list of all Object Details")
-    @GetMapping(path = "/object", produces = "application/json")
+    @GetMapping
     public ResponseEntity<Response<ModuleObjectDTO>> getAllObject(DFHeader header) throws Exception {
         Response<ModuleObjectDTO> response = service.getAllObject(header);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -62,20 +64,22 @@ public class ObjectController {
      */
 
     @ApiOperation(value = "Get object Details by Name", notes = "Get object Details")
-    @GetMapping("/object/name/{objectName}")
+    @GetMapping("name/{objectName}")
     public ResponseEntity<Response<ModuleObjectDTO>> getObjectByName(@Valid DFHeader header, @PathVariable String objectName)
             throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(service.getObjectByName(header, objectName));
     }
 
 
-    @ApiOperation(value = "Object section Details", notes = "Get a list of all Object section Details")
-    @GetMapping("/section/{menuId}")
-    public ResponseEntity<Response<EntityDTO>> getSectionList(@Valid DFHeader header, @PathVariable long menuId)
-            throws Exception {
-        Response<EntityDTO> response = service.getSectionList(header, menuId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+	/*
+	 * @ApiOperation(value = "Object section Details", notes =
+	 * "Get a list of all Object section Details")
+	 * 
+	 * @GetMapping("/section/{menuId}") public ResponseEntity<Response<EntityDTO>>
+	 * getSectionList(@Valid DFHeader header, @PathVariable long menuId) throws
+	 * Exception { Response<EntityDTO> response = service.getSectionList(header,
+	 * menuId); return ResponseEntity.status(HttpStatus.OK).body(response); }
+	 */
 
     /*
      * @ApiOperation(value = "Object section Details", notes =
@@ -91,10 +95,15 @@ public class ObjectController {
 
 
     @ApiOperation(value = "Get last n updated object Details", notes = "Get a list of all Object Details")
-    @GetMapping("v1/objects/lastUpdated/{number}")
+    @GetMapping("lastUpdated/{number}")
     public ResponseEntity<Response<ModuleObjectDTO>> getLastNUpdatedObjects(@Valid DFHeader header, @PathVariable int number) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(service.getLastNUpdatedObjects(header, number));
     }
-
+    
+    @ApiOperation(value = "Menu Hierarchy List Details", notes = "Get a list of all Menu Hierarchies")
+	@GetMapping("menuHierarchies")
+	public ResponseEntity<Response<MenuHierarchyDTO>> getMenuHierarchy(DFHeader header) throws Exception {
+		return ResponseEntity.status(HttpStatus.OK).body(service.getMenuHierarchy(header));
+	}
 
 }
