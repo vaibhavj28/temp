@@ -21,7 +21,7 @@ spec:
         app: commonbff  
     spec:  
       containers:  
-      - image: 183454673550.dkr.ecr.ap-south-1.amazonaws.com/test1:latest  
+      - image: 183454673550.dkr.ecr.ap-south-1.amazonaws.com/test1:common_bff
         imagePullPolicy: Always  
         name: commonbff  
         ports:  
