@@ -27,7 +27,7 @@ service:
      mdm_user_mgmt_url: ${service.mdmUserManagement.protocol}${service.mdmUserManagement.host}${service.mdmUserManagement.port}${service.mdmUserManagement.version}
 
   lookUpNotepadCommandmentService:
-      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:172.20.148.55}
+      host: ${LOOKUP_NOTEPAD_COMMANDMENT_HOST:172.20.152.90}
       port: ${LOOKUP_NOTEPAD_COMMANDMENT_PORT::80}
       version: /v1
       lookUp_uri: /mdm/
