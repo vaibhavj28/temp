@@ -46,7 +46,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	public TokenDTO getToken(DFHeader header, CredentialDTO credentialDTO) {
 		
 		String url= authnzServiceUrl + "/" + "login";
-		logger.debug("requesting resouce {}", url);
+		logger.debug("requesting resource {}", url);
 		
 		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<CredentialDTO> httpEntity = new HttpEntity<>(credentialDTO,httpHeaders);
@@ -77,7 +77,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	public void logout(DFHeader header) {
 		
 		String url= authnzServiceUrl + "/" + "logout";
-		logger.debug("requesting resouce {}", url);
+		logger.debug("requesting resource {}", url);
 		
 		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
@@ -96,7 +96,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	public Map<String, Object> getAllPermissionsForUser(DFHeader header) {
 		
 		String url= authnzServiceUrl + "/" + "permissions";
-		logger.debug("requesting resouce {}", url);
+		logger.debug("requesting resource {}", url);
 		
 		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
@@ -112,7 +112,7 @@ public class AuthnzServiceImpl implements AuthnzService {
 	public List<MenuHierarchyDTO> getUserMenu(DFHeader header) {
 		
 		String url= authnzServiceUrl + "/" + "menu";
-		logger.debug("requesting resouce {}", url);
+		logger.debug("requesting resource {}", url);
 		
 		HttpHeaders httpHeaders = BaseUtil.payload(header);
 		HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);

@@ -22,10 +22,11 @@ import org.springframework.context.annotation.Primary;
 
 import com.safexpress.propeli.authorization.filter.AuthFilter;
 import com.safexpress.propeli.authorization.filter.BranchAuthFilter;
-import com.safexpress.propeli.bff.realm.CustomRealm;
 import com.safexpress.propeli.cache.manager.AuthnzCacheManagerImpl;
+import com.safexpress.propeli.security.filter.ExceptionHandlerFilter;
 import com.safexpress.propeli.security.filter.SecurityFilter;
 import com.safexpress.propeli.security.filter.SessionFilter;
+import com.safexpress.propeli.security.realm.CustomRealm;
 import com.safexpress.propeli.security.util.AuthUtil;
 
 /**
@@ -84,6 +85,11 @@ public class SecurityConfiguration {
 	public AuthFilter authFilter() {
 		return new AuthFilter();
 	}
+	
+	@Bean
+	public ExceptionHandlerFilter exceptionHandlerFilter() {
+		return new ExceptionHandlerFilter();
+	}
 
 	@Bean
 	public SessionDAO sessionDAO() {
@@ -114,7 +120,7 @@ public class SecurityConfiguration {
 	    registration.setFilter(securityFilter());
 	    registration.setName(AuthUtil.filterTypeEnum.SECURITY_FILTER.value());
 	    // filter order should be set as per the requirement
-	    registration.setOrder(2);
+	    registration.setOrder(3);
 	    return registration;
 	}
 
@@ -126,9 +132,20 @@ public class SecurityConfiguration {
 	    registration.addUrlPatterns("/secure/*"); // url pattern is as per servlet specification
 	    registration.setName(AuthUtil.filterTypeEnum.AUTH_FILTER.value());
 	    // filter order should be set as per the requirement
+	    registration.setOrder(2);
+	    return registration;
+	}
+	
+	@Bean
+	public FilterRegistrationBean<ExceptionHandlerFilter> exceptionHandlerFilterRegisterationBean() {
+
+	    FilterRegistrationBean<ExceptionHandlerFilter> registration = new FilterRegistrationBean<>();
+	    registration.setFilter(exceptionHandlerFilter());
+	    registration.addUrlPatterns("/secure/*"); // url pattern is as per servlet specification
+	    registration.setName(AuthUtil.filterTypeEnum.EXCEPTION_HANDLER_FILTER.value());
+	    // filter order should be set as per the requirement
 	    registration.setOrder(1);
 	    return registration;
 	}
-
 
 }
