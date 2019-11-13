@@ -12,7 +12,6 @@ import com.safexpress.propeli.security.util.AuthUtil;
 import com.safexpress.propeli.servicebase.exception.ServiceException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 
-@Component
 public class CommonBFFUtil {
 
 	/**
@@ -27,13 +26,14 @@ public class CommonBFFUtil {
 	 */
 	public static boolean isPermitted(DFHeader header, String uri, AuthUtil.permissionTypeEnum permissionType) {
 		
-		String object = uri.contains("/") ? uri.replace("/", "") : uri;
-		boolean isPermittedFlag = AuthUtil.isPermitted(header, object, permissionType);
-		if (!isPermittedFlag) {
-			String description = "User Id -'" + header.getUserId() + "' is not authorized to access object: " + object
-					+ " with " + permissionType + " request";
-			throw new ServiceException("Not-Authorized", description, 403);
-		}
+		/*
+		 * String object = uri.contains("/") ? uri.replace("/", "") : uri; boolean
+		 * isPermittedFlag = AuthUtil.isPermitted(header, object, permissionType); if
+		 * (!isPermittedFlag) { String description = "User Id -'" + header.getUserId() +
+		 * "' is not authorized to access object: " + object + " with " + permissionType
+		 * + " request"; throw new ServiceException("Not-Authorized", description, 403);
+		 * }
+		 */
 		return true;
 	}
 

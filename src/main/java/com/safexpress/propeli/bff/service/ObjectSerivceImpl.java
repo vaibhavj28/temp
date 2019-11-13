@@ -73,7 +73,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             List<LookUpMDMDTO> lookUpChannels = getLookUpByChannelType(header, entity);
             response.setData(moduleObjects);
             ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setCategoryList(lookUpChannels);
+            referenceDTO.setChannelList(lookUpChannels);
             response.setRefernceList(referenceDTO);
             response.setMessage("success");
             return response;
@@ -163,7 +163,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             
             List<LookUpMDMDTO> lookUpChannels = getLookUpByChannelType(header, entity);
             ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setCategoryList(lookUpChannels);
+            referenceDTO.setChannelList(lookUpChannels);
             response.setRefernceList(referenceDTO);
             response.setData(moduleObjectDTOS);
             response.setMessage(successMessage);
@@ -232,7 +232,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
                 
                 List<LookUpMDMDTO> lookUpChannels = getLookUpByChannelType(header, entity);
                 ReferenceDTO referenceDTO = new ReferenceDTO();
-                referenceDTO.setCategoryList(lookUpChannels);
+                referenceDTO.setChannelList(lookUpChannels);
                 response.setRefernceList(referenceDTO);
                 response.setData(objects.getBody());
                 response.setMessage(successMessage);

@@ -1,9 +1,8 @@
 package com.safexpress.propeli.bff.dto;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class Response<T> {

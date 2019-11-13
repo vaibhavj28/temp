@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 
 import javax.validation.Valid;
 
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,11 @@ import com.safexpress.propeli.bff.dto.RoleDTO;
 import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.bff.utility.CommonBFFUtil;
 import com.safexpress.propeli.security.util.AuthUtil;
-import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.exception.ServiceException;
 import com.safexpress.propeli.servicebase.model.DFHeader;
 import com.safexpress.propeli.servicebase.util.BaseUtil;
+
+import io.micrometer.core.instrument.util.StringUtils;
 
 @Service
 public class MdmServiceImpl implements MdmService {
@@ -123,7 +125,7 @@ public class MdmServiceImpl implements MdmService {
             
             List<LookUpMDMDTO> lookUpChannels = getLookUpByChannel(header, entity);
             ReferenceDTO referenceDTO = new ReferenceDTO();
-            referenceDTO.setCategoryList(lookUpChannels);
+            referenceDTO.setChannelList(lookUpChannels);
             List<RolePermissionDTO> rolePermission = new ArrayList<>();
             rolePermission.add(rolePermissionDTO);
             response.setRefernceList(referenceDTO);
@@ -167,34 +169,26 @@ public class MdmServiceImpl implements MdmService {
      * @return ResponseDTO<Integer>
      * @throws Exception exception
      */
-    @Override
-    public ResponseDTO<Integer> addRolePermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
+	@Override
+    public String addRolePermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
         try {
             
             HttpEntity<RoleDTO> entity = new HttpEntity<>(roleDetail.getRoleDto(), BaseUtil.payload(header));
-            ResponseDTO<Integer> response = new ResponseDTO<>();
-            int status = 0;
-            String data = null;
-            RoleDTO role = new RoleDTO();
+            String permissionMessage = null;
+          
+            Map<String, String> responseMap = new HashMap<>();
             
             if (CommonBFFUtil.isPermitted(header, rolesUri, AuthUtil.permissionTypeEnum.POST)) {
-                role = restTemplate.exchange(new URI(rolesUrl), HttpMethod.POST, entity, RoleDTO.class)
-                        .getBody();
+            	responseMap = restTemplate.exchange(new URI(rolesUrl), HttpMethod.POST, entity, Map.class).getBody();
             }
-            if (role.getRoleId() != 0) {
-                status = 1;
-                data = "role created without permissions";
-            }
-            roleDetail.setRoleDto(role);
-            if (!CollectionUtils.isEmpty(roleDetail.getObjectPermissionList())) {
-                status = addPermission(header, roleDetail);
-                if (status == 1) {
-                    data = "role created with permissions";
-                }
-            }
-            response.setMessage(data);
-            response.setData(status);
-            return response;
+                        
+            if(MapUtils.isNotEmpty(responseMap) && !CollectionUtils.isEmpty(roleDetail.getObjectPermissionList())) {
+            	permissionMessage = addPermission(header, roleDetail);
+            } 
+            String roleMessage =  responseMap.get("responseMessage");
+            String responseMsg = StringUtils.isNotEmpty(permissionMessage) ?  roleMessage + " " + "and" + " " + permissionMessage : roleMessage;
+            
+            return responseMsg;
 
         } catch (RestClientException e) {
             log.error("Inside MdmServiceImpl :: addRolePermission() " + e.getMessage());
@@ -210,21 +204,15 @@ public class MdmServiceImpl implements MdmService {
      * @return int
      * @throws Exception exception
      */
-    private int addPermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {
-        try {
+    private String addPermission(DFHeader header, RolePermissionDTO roleDetail) throws Exception {        
             
             HttpEntity<RolePermissionDTO> rolePermissionEntity = new HttpEntity<>(roleDetail, BaseUtil.payload(header));
-            int result = 0;
+            Map<String, String> responseMap = new HashMap<>();
            
             if (CommonBFFUtil.isPermitted(header, rolesUri, AuthUtil.permissionTypeEnum.GET)) {
-                result = restTemplate.exchange(new URI(rolesUrl + "permissions"), HttpMethod.POST, rolePermissionEntity, Integer.class).getBody();
-            }
-            
-            return result;
-        } catch (RestClientException e) {
-            log.error("Inside MdmServiceImpl :: addPermission() " + e.getMessage());
-            return 0;
-        }
+            	responseMap = restTemplate.exchange(new URI(rolesUrl + "permissions"), HttpMethod.POST, rolePermissionEntity, Map.class).getBody();
+            }            
+            return responseMap.get("responseMessage");        
     }
 
     /**
@@ -269,24 +257,24 @@ public class MdmServiceImpl implements MdmService {
      * @return Integer
      */
     @Override
-    public Integer editRolePermission(DFHeader header, RolePermissionDTO roleDetail) {
+    public String editRolePermission(DFHeader header, RolePermissionDTO roleDetail) {
         try {
             
             HttpEntity<RolePermissionDTO> entity = new HttpEntity<>(roleDetail, BaseUtil.payload(header));
-            Integer result = null;
+                        
+            Map<String, String> responseMap = new HashMap<>();
             
             if (CommonBFFUtil.isPermitted(header, rolesUri, AuthUtil.permissionTypeEnum.GET)) {
-                result = restTemplate.exchange(new URI(rolesUrl + "/permissions"), HttpMethod.PUT, entity, Integer.class)
-                        .getBody();
+            	responseMap = restTemplate.exchange(new URI(rolesUrl + "/permissions"), HttpMethod.PUT, entity, Map.class).getBody();
             }
-            return result;
+            return responseMap.get("responseMessage");
 
         } catch (RestClientException | URISyntaxException e) {
             throw new RuntimeException(e.getMessage());
         }
 
     }
-
+    
     /**
      * This method will return the last N updated roles
      *

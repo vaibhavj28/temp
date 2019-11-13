@@ -6,10 +6,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.safexpress.propeli.bff.dto.AttributeDTO;
 
 @JsonInclude(Include.NON_NULL)
 public class ModuleObjectDTO implements Serializable {
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 	private long moduleId;
 	private long objectId;
@@ -37,7 +39,9 @@ public class ModuleObjectDTO implements Serializable {
 	@JsonInclude(Include.NON_NULL)
 	private Date effectiveDate;
 	@JsonInclude(Include.NON_NULL)
-	private Date expiryDaye;
+	private Date expiryDate;
+	@JsonInclude(Include.NON_NULL)
+	private int status;
 
 	/**
 	 * @return the channelId
@@ -184,13 +188,13 @@ public class ModuleObjectDTO implements Serializable {
 		this.objectId = objectId;
 	}
 
-	/*
-	 * public int getStatus() { return status; }
-	 */
+	public int getStatus() {
+		return status;
+	}
 
-	/*
-	 * public void setStatus(int status) { this.status = status; }
-	 */
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
 	@Override
 	public String toString() {
@@ -279,11 +283,11 @@ public class ModuleObjectDTO implements Serializable {
 	}
 
 	public Date getExpiryDaye() {
-		return expiryDaye;
+		return expiryDate;
 	}
 
-	public void setExpiryDaye(Date expiryDaye) {
-		this.expiryDaye = expiryDaye;
+	public void setExpiryDaye(Date expiryDate) {
+		this.expiryDate = expiryDate;
 	}
-	
+
 }

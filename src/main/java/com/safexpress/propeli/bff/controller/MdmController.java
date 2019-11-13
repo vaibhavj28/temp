@@ -1,19 +1,30 @@
 package com.safexpress.propeli.bff.controller;
 
-import com.safexpress.propeli.bff.dto.*;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.safexpress.propeli.bff.dto.LookUpDTO;
+import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.dto.RoleDTO;
+import com.safexpress.propeli.bff.dto.RolePermissionDTO;
 import com.safexpress.propeli.bff.service.MdmService;
 import com.safexpress.propeli.servicebase.annotation.SFXApi;
 import com.safexpress.propeli.servicebase.dto.ResponseDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @Api(value = "User Management MDM BFF Controller")
 @SFXApi
@@ -38,21 +49,25 @@ public class MdmController {
 
 	@ApiOperation(value = "Creates A Role with permissions")
 	@PostMapping
-	public ResponseEntity<ResponseDTO> createRolePermission(@Valid DFHeader header,
+	public ResponseEntity<ResponseDTO<String>> createRolePermission(@Valid DFHeader header,
 			@ApiParam(value = "Role data to be inserted", required = true) @Valid @RequestBody RolePermissionDTO roleDetail) throws Exception{
-
-		ResponseDTO response = service.addRolePermission(header, roleDetail);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		
+		String responseStatus = service.addRolePermission(header, roleDetail);
+        ResponseDTO<String> responseDTO = new ResponseDTO<String>();
+        responseDTO.setMessage("success");
+        responseDTO.setData(responseStatus);		
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 	
 	@ApiOperation(value = "Updates A Role with permissions")
 	@PutMapping
-	public ResponseEntity<ResponseDTO> updateRolePermission(@Valid DFHeader header,
+	public ResponseEntity<ResponseDTO<String>> updateRolePermission(@Valid DFHeader header,
 			@ApiParam(value = "Role data to be updated", required = true) @Valid @RequestBody RolePermissionDTO roleDetail) {
-		ResponseDTO responseDTO = new ResponseDTO();
-		Integer res = service.editRolePermission(header,roleDetail);
-		responseDTO.setMessage("Role Updated");
-		responseDTO.setData(res);
+		
+		String responseStatus = service.editRolePermission(header,roleDetail);
+        ResponseDTO<String> responseDTO = new ResponseDTO<String>();
+        responseDTO.setMessage("success");
+        responseDTO.setData(responseStatus);	
 		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 	}
 	

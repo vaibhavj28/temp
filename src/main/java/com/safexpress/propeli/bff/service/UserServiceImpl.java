@@ -78,13 +78,13 @@ public class UserServiceImpl implements UserService {
 	public String saveUser(DFHeader header, UserDTO user) throws Exception {
 		try {
 			UserDTO newUser = CommonBFFUtil.setAdminFieldForUser(header, user);
-			Map<String, String> response = new HashMap<>();
+			Map<String, String> responseMap = new HashMap<>();
 
 			if (CommonBFFUtil.isPermitted(header, usersUri, AuthUtil.permissionTypeEnum.POST)) {
 				HttpEntity<UserDTO> entity = new HttpEntity<>(newUser, BaseUtil.payload(header));
-				response = restTemplate.exchange(new URI(usersUrl), HttpMethod.POST, entity, Map.class).getBody();
+				responseMap = restTemplate.exchange(new URI(usersUrl), HttpMethod.POST, entity, Map.class).getBody();
 			}
-			return response.get("responseMessage");
+			return responseMap.get("responseMessage");
 		} catch (RestClientResponseException e) {
 			log.error("Inside UserServiceImpl :: saveUser()" + e.getResponseBodyAsString());
 			throw e;
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 			List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
 			BranchDTO branchDTO = getBranchDetails(header, entity, userDTO);
 			ReferenceDTO referenceDTO = new ReferenceDTO();
-			referenceDTO.setCategoryList(lookUpResponse);
+			referenceDTO.setUserCategoryList(lookUpResponse);
 			List<BranchDTO> branchDTOs = new ArrayList<>();
 			branchDTOs.add(branchDTO);
 			referenceDTO.setBranch(branchDTOs);
@@ -287,7 +287,7 @@ public class UserServiceImpl implements UserService {
 			
 			List<UserDTO> userList  = userDTOs.stream().map(user -> CommonBFFUtil.setAdminFieldForUser(header, user)).collect(Collectors.toList());
 			
-			referenceDTO.setCategoryList(lookUpResponse);			
+			referenceDTO.setUserCategoryList(lookUpResponse);			
 			response.setRefernceList(referenceDTO);
 			response.setData(userList);
 			response.setMessage(successMessage);
@@ -427,7 +427,7 @@ public class UserServiceImpl implements UserService {
 				
 				List<LookUpMDMDTO> lookUpResponse = getLookUpDetails(header, entity);
 				
-				referenceDTO.setCategoryList(lookUpResponse);
+				referenceDTO.setUserCategoryList(lookUpResponse);
 				response.setRefernceList(referenceDTO);
 				response.setData(userList);
 				response.setMessage(successMessage);

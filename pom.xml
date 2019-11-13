@@ -10,7 +10,7 @@
 	<artifactId>CommonBFF</artifactId>
 	<groupId>com.safexpress.propeli</groupId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>commonBff</name>
+	<name>Common BFF Service</name>
 	<description>Microservice for Common BFF Functionality</description>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->

@@ -1,7 +1,7 @@
 package com.safexpress.propeli.bff.dto;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -29,9 +29,9 @@ public class AttributeDTO implements Serializable{
 	@JsonInclude(Include.NON_NULL)
 	private String isAddorUpdate;
 	@JsonInclude(Include.NON_NULL)
-	private Timestamp effectiveDate;
+	private Date effectiveDate;
 	@JsonInclude(Include.NON_NULL)
-	private Timestamp expiryDate;
+	private Date expiryDate;
 	private String addOrRemoveOrUpdate;
 	
 	
@@ -133,39 +133,25 @@ public class AttributeDTO implements Serializable{
 	}
 	public void setId(long id) {
 		Id = id;
-	}
-	/**
-	 * @return the effectiveDate
-	 */
-	public Timestamp getEffectiveDate() {
-		return effectiveDate;
-	}
-	/**
-	 * @param effectiveDate the effectiveDate to set
-	 */
-	public void setEffectiveDate(Timestamp effectiveDate) {
-		this.effectiveDate = effectiveDate;
-	}
-	/**
-	 * @return the expiryDate
-	 */
-	public Timestamp getExpiryDate() {
-		return expiryDate;
-	}
-	/**
-	 * @param expiryDate the expiryDate to set
-	 */
-	public void setExpiryDate(Timestamp expiryDate) {
-		this.expiryDate = expiryDate;
-	}
+	}	
+	
 	public String getAddOrRemoveOrUpdate() {
 		return addOrRemoveOrUpdate;
 	}
 	public void setAddOrRemoveOrUpdate(String addOrRemoveOrUpdate) {
 		this.addOrRemoveOrUpdate = addOrRemoveOrUpdate;
 	}
+	public Date getEffectiveDate() {
+		return effectiveDate;
+	}
+	public void setEffectiveDate(Date effectiveDate) {
+		this.effectiveDate = effectiveDate;
+	}
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
 	
-	
-	
-
 }
