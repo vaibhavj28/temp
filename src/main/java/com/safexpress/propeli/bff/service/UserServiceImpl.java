@@ -147,12 +147,12 @@ public class UserServiceImpl implements UserService {
 	private BranchDTO getBranchDetails(DFHeader header, HttpEntity<DFHeader> entity, UserDTO userDTO)
 			throws URISyntaxException {
 		BranchDTO branchDTO = null;
-		if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-			ResponseEntity<BranchDTO> response = restTemplate.exchange(new URI(
-					branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userDTO.getDefaultBranch().getBranchCode()),
-					HttpMethod.GET, entity, BranchDTO.class);
-			branchDTO = response.getBody();
-		}
+
+		ResponseEntity<BranchDTO> response = restTemplate.exchange(
+				new URI(branchUrl + CommonBFFConstant.GET_BRANCH_CODE_URI + userDTO.getDefaultBranch().getBranchCode()),
+				HttpMethod.GET, entity, BranchDTO.class);
+		branchDTO = response.getBody();
+
 		return branchDTO;
 	}
 
@@ -167,17 +167,15 @@ public class UserServiceImpl implements UserService {
 	 */
 	private List<LookUpMDMDTO> getLookUpDetails(DFHeader header, HttpEntity<DFHeader> entity)
 			throws URISyntaxException {
-		
+
 		List<LookUpMDMDTO> lookUpResponse = new ArrayList<>();
-		String lookupUri = "lookUp";
-		
-		if (CommonBFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
-			lookUpResponse = restTemplate.exchange(
-					new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI
-							+ CommonBFFConstant.USER_CATEGORY_CHANNEL),
-					HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
-					}).getBody();
-		}
+
+		lookUpResponse = restTemplate.exchange(
+				new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI
+						+ CommonBFFConstant.USER_CATEGORY_CHANNEL),
+				HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
+				}).getBody();
+
 		return lookUpResponse;
 	}
 

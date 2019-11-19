@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 
 import com.safexpress.propeli.bff.dto.UserDTO;
@@ -25,15 +24,15 @@ public class CommonBFFUtil {
 	 * @return - true or false
 	 */
 	public static boolean isPermitted(DFHeader header, String uri, AuthUtil.permissionTypeEnum permissionType) {
-		
-		/*
-		 * String object = uri.contains("/") ? uri.replace("/", "") : uri; boolean
-		 * isPermittedFlag = AuthUtil.isPermitted(header, object, permissionType); if
-		 * (!isPermittedFlag) { String description = "User Id -'" + header.getUserId() +
-		 * "' is not authorized to access object: " + object + " with " + permissionType
-		 * + " request"; throw new ServiceException("Not-Authorized", description, 403);
-		 * }
-		 */
+
+		String object = uri.contains("/") ? uri.replace("/", "") : uri;
+		boolean isPermittedFlag = AuthUtil.isPermitted(header, object, permissionType);
+		if (!isPermittedFlag) {
+			String description = "User Id -'" + header.getUserId() + "' is not authorized to access object: " + object
+					+ " with " + permissionType + " request";
+			throw new ServiceException("Not-Authorized", description, 403);
+		}
+
 		return true;
 	}
 

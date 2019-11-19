@@ -147,19 +147,17 @@ public class MdmServiceImpl implements MdmService {
      * @return List<LookUpMDMDTO>
      * @throws URISyntaxException URISyntaxException
      */
-    private List<LookUpMDMDTO> getLookUpByChannel(DFHeader header, HttpEntity<DFHeader> entity) throws URISyntaxException {
-        List<LookUpMDMDTO> lookUpChannels = new ArrayList<>();
-        String lookupUri = "lookUp";
-        
-        if (CommonBFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
-            lookUpChannels = restTemplate.exchange(
-                    new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + CommonBFFConstant.LOOK_UP_CHANNEL), HttpMethod.GET, entity,
-                    new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
-                    }).getBody();
-        }
-        
-        return lookUpChannels;
-    }
+	private List<LookUpMDMDTO> getLookUpByChannel(DFHeader header, HttpEntity<DFHeader> entity)
+			throws URISyntaxException {
+		List<LookUpMDMDTO> lookUpChannels = new ArrayList<>();
+
+		lookUpChannels = restTemplate.exchange(
+				new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + CommonBFFConstant.LOOK_UP_CHANNEL),
+				HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
+				}).getBody();
+
+		return lookUpChannels;
+	}
 
     /**
      * This method will add a role with permission
@@ -222,31 +220,29 @@ public class MdmServiceImpl implements MdmService {
      * @param lookupType String
      * @return Response<LookUpDTO>
      */
-    @Override
-    public Response<LookUpDTO> lookupData(@Valid DFHeader header, String lookupType) {
-        try {
-            String lookupUri = "lookUp";
-            Response<LookUpDTO> response = new Response<>();
-            HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("lookupType", lookupType);
-            List<LookUpDTO> lookUpDTOs = new ArrayList<>();
-            URI uri = UriComponentsBuilder.fromUriString(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI
-                    + "{lookupType}").buildAndExpand(params).toUri();
-            
-            if (CommonBFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
-                lookUpDTOs = restTemplate.exchange(uri, HttpMethod.GET, entity,
-                        new ParameterizedTypeReference<List<LookUpDTO>>() {
-                        }).getBody();
-            }
-            
-            response.setData(lookUpDTOs);
-            response.setMessage(successMessage);
-            return response;
-        } catch (RestClientException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+	@Override
+	public Response<LookUpDTO> lookupData(@Valid DFHeader header, String lookupType) {
+		try {
+			Response<LookUpDTO> response = new Response<>();
+			HttpEntity<Long> entity = new HttpEntity<>(BaseUtil.payload(header));
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("lookupType", lookupType);
+			List<LookUpDTO> lookUpDTOs = new ArrayList<>();
+			URI uri = UriComponentsBuilder
+					.fromUriString(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + "{lookupType}")
+					.buildAndExpand(params).toUri();
+
+			lookUpDTOs = restTemplate
+					.exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<List<LookUpDTO>>() {
+					}).getBody();
+
+			response.setData(lookUpDTOs);
+			response.setMessage(successMessage);
+			return response;
+		} catch (RestClientException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 
 
     /**
