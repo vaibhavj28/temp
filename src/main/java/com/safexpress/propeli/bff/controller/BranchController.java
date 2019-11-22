@@ -1,12 +1,7 @@
 package com.safexpress.propeli.bff.controller;
 
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.Response;
-import com.safexpress.propeli.bff.service.BranchService;
-import com.safexpress.propeli.servicebase.annotation.SFXApi;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +10,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import com.safexpress.propeli.bff.dto.BranchDTO;
+import com.safexpress.propeli.bff.dto.PincodeDTO;
+import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.service.BranchService;
+import com.safexpress.propeli.servicebase.annotation.SFXApi;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "Branch MDM BFF Controller")
 @SFXApi
@@ -27,7 +31,7 @@ public class BranchController {
 
     @ApiOperation(value = "Get the list of latest N created branches based on input number", notes = "Get the list of latest N created Branches")
     @GetMapping("{lastNCreatedBranches}")
-    public ResponseEntity<Response<BranchDTO>>getNLastCreatedBranches(@Valid DFHeader header, @PathVariable("lastNCreatedBranches") int numberOfBranch) throws Exception {
+    public ResponseEntity<Response<BranchDTO>>getNLastUpdatedBranches(@Valid DFHeader header, @PathVariable("lastNCreatedBranches") int numberOfBranch) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(service.getLatestNBranches(header, numberOfBranch));
     }
 
@@ -68,5 +72,12 @@ public class BranchController {
     public ResponseEntity<Response<String>> getAllBranchesTypes(@Valid DFHeader header) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(service.getAllBranchesTypes(header));
     }
+    
+    @ApiOperation(value = "Get list of pincodes values matching the search characters")
+	@GetMapping("/pincode/{pincodeSearchCharacters}")
+	public ResponseEntity<Response<PincodeDTO>> getDetailsFromPincode(DFHeader header,
+			@ApiParam(value = "Provide pincode search characters", required = true) @PathVariable("pincodeSearchCharacters") String pincode) throws Exception {
+		return ResponseEntity.ok().body(service.getDetailsByPincode(header, pincode));
+	}
 
 }

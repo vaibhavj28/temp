@@ -1,7 +1,7 @@
 package com.safexpress.propeli.bff.service;
 
-import com.safexpress.propeli.bff.constants.CommonBFFConstant;
-import com.safexpress.propeli.bff.utility.CommonBFFUtil;
+import com.safexpress.propeli.bff.constants.BFFConstants;
+import com.safexpress.propeli.bff.utility.BFFUtil;
 import com.safexpress.propeli.bff.dto.*;
 import com.safexpress.propeli.security.util.AuthUtil;
 import com.safexpress.propeli.servicebase.exception.ServiceException;
@@ -64,7 +64,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
             List<ModuleObjectDTO> moduleObjects = new ArrayList<>();
             
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 moduleObjects = restTemplate.exchange(new URI(objectUrl),
                         HttpMethod.GET, entity, new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
                         }).getBody();
@@ -94,9 +94,9 @@ public class ObjectSerivceImpl implements ObjectSerivce {
         List<LookUpMDMDTO> lookUpMDMDTO = new ArrayList<>();
         String lookupUri = "lookUp";
         
-        if (CommonBFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
+        if (BFFUtil.isPermitted(header, lookupUri, AuthUtil.permissionTypeEnum.GET)) {
             lookUpMDMDTO = restTemplate.exchange(
-                    new URI(lookUpUrl + CommonBFFConstant.GET_LOOK_UP_DETAILS_URI + "CHANNEL"), HttpMethod.GET, entity,
+                    new URI(lookUpUrl + BFFConstants.GET_LOOK_UP_DETAILS_URI + "CHANNEL"), HttpMethod.GET, entity,
                     new ParameterizedTypeReference<List<LookUpMDMDTO>>() {
                     }).getBody();
         }
@@ -122,7 +122,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             params.put("objectId", objectId);
             ModuleObjectDTO moduleObjectDTO = new ModuleObjectDTO();
            
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/byId/{objectId}").buildAndExpand(params)
                         .toUri();
                 moduleObjectDTO = restTemplate.exchange(uri, HttpMethod.GET, entity, ModuleObjectDTO.class).getBody();
@@ -155,7 +155,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/name/{objectName}").buildAndExpand(params)
                     .toUri();
            
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 moduleObjectDTOS = restTemplate.exchange(uri, HttpMethod.GET, entity,
                         new ParameterizedTypeReference<List<ModuleObjectDTO>>() {
                         }).getBody();
@@ -169,7 +169,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             response.setMessage(successMessage);
             return response;
         } catch (RestClientResponseException e) {
-            JSONObject error = CommonBFFUtil.handleError(e);
+            JSONObject error = BFFUtil.handleError(e);
             String description = error.get("description").toString().replace("ServiceException:", "");
             throw new ServiceException("ERROR01", description, Integer.parseInt(error.has("status") ? (error.get("status").toString()) : "500"));
         }
@@ -196,7 +196,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             List<EntityDTO> entityList = new ArrayList<>();
             URI uri = UriComponentsBuilder.fromUriString(objectUrl + "/sections/{menuId}").buildAndExpand(params).toUri();
            
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 entityList = restTemplate.exchange(uri, HttpMethod.GET, entity,
                         new ParameterizedTypeReference<List<EntityDTO>>() {
                         }).getBody();
@@ -223,7 +223,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
         try {
             
             Response<ModuleObjectDTO> response = new Response<>();
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
                 ResponseEntity<List<ModuleObjectDTO>> objects = restTemplate.exchange(new URI(objectUrl + "lastUpdated/" +
                                 number), HttpMethod.GET,
@@ -258,7 +258,7 @@ public class ObjectSerivceImpl implements ObjectSerivce {
             HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
             List<MenuHierarchyDTO> menuHierarchyDTOs = new ArrayList<>();
             
-            if (CommonBFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
+            if (BFFUtil.isPermitted(header, objectUri, AuthUtil.permissionTypeEnum.GET)) {
                 menuHierarchyDTOs = restTemplate.exchange(new URI(objectUrl + "menuHierarchies"), HttpMethod.GET,
                         entity, new ParameterizedTypeReference<List<MenuHierarchyDTO>>() {
                         }).getBody();

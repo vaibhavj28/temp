@@ -18,7 +18,6 @@ public class BranchDTO implements Serializable {
 	private static final long serialVersionUID = 316332571995776L;
 	
 	@JsonInclude(Include.NON_ABSENT)
-	@JsonIgnore
 	private Long branchId;
 	@JsonInclude(Include.NON_NULL)
 	@JsonIgnore

@@ -1,14 +1,9 @@
 package com.safexpress.propeli.bff.service;
 
-import com.safexpress.propeli.bff.dto.BranchDTO;
-import com.safexpress.propeli.bff.dto.HierarchyBranchListDTO;
-import com.safexpress.propeli.bff.dto.Response;
-import com.safexpress.propeli.bff.dto.UserBranchMappingDTO;
-import com.safexpress.propeli.bff.utility.CommonBFFUtil;
-import com.safexpress.propeli.security.util.AuthUtil;
-import com.safexpress.propeli.servicebase.exception.ServiceException;
-import com.safexpress.propeli.servicebase.model.DFHeader;
-import com.safexpress.propeli.servicebase.util.BaseUtil;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +17,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import com.safexpress.propeli.bff.dto.BranchDTO;
+import com.safexpress.propeli.bff.dto.HierarchyBranchListDTO;
+import com.safexpress.propeli.bff.dto.PincodeDTO;
+import com.safexpress.propeli.bff.dto.Response;
+import com.safexpress.propeli.bff.dto.UserBranchMappingDTO;
+import com.safexpress.propeli.bff.utility.BFFUtil;
+import com.safexpress.propeli.servicebase.exception.ServiceException;
+import com.safexpress.propeli.servicebase.model.DFHeader;
+import com.safexpress.propeli.servicebase.util.BaseUtil;
 
 @Service
 public class BranchServiceImpl implements BranchService {
@@ -34,16 +35,16 @@ public class BranchServiceImpl implements BranchService {
     private RestTemplate restTemplate;
 
     @Value("${service.branchService.branch_url}")
-    private
-    String branchUrl;
+    private String branchUrl;
 
     @Value("${message.success}")
-    private
-    String successMessage;
+    private String successMessage;
 
     @Value("${service.branchService.branch_uri}")
-    private
-    String branchUri;
+    private String branchUri;
+    
+    @Value("${service.branchService.geo_url}")
+    private String geoUrl;
 
     private static final Logger log = LoggerFactory.getLogger(BranchServiceImpl.class);
 
@@ -55,29 +56,28 @@ public class BranchServiceImpl implements BranchService {
      * @param numberOfBranch numberOfBranch
      * @return Response<BranchDTO>
      */
-    @Override
-    public Response<BranchDTO> getLatestNBranches(DFHeader header, int numberOfBranch) throws Exception {
-        try {
-            
-            Response<BranchDTO> response = new Response<>();
-            
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(new URI(branchUrl + "lastUpdated/" +
-                                numberOfBranch), HttpMethod.GET,
-                        entity, new ParameterizedTypeReference<List<BranchDTO>>() {
-                        });
-                
-                response.setData(branchDTOs.getBody());
-                response.setMessage(successMessage);
-            }
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
+	@Override
+	public Response<BranchDTO> getLatestNBranches(DFHeader header, int numberOfBranch) throws Exception {
+		try {
+			Response<BranchDTO> response = new Response<>();
 
-        }
-    }
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(
+					new URI(branchUrl + "lastUpdated/" + numberOfBranch), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<BranchDTO>>() {
+					});
+
+			response.setData(branchDTOs.getBody());
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+
+		}
+	}
 
     /**
      * This method will return the branch by branch code
@@ -87,31 +87,31 @@ public class BranchServiceImpl implements BranchService {
      * @return Response<BranchDTO>
      * @throws Exception exception
      */
-    @Override
-    public Response<BranchDTO> getBranchByCode(DFHeader header, String branchCode) throws Exception {
-        Response<BranchDTO> result;
-        try {
-            
-            Response<BranchDTO> response = new Response<>();
-            
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                BranchDTO branchDTO = restTemplate.exchange(new URI(branchUrl + "branchCode/" + branchCode),
-                        HttpMethod.GET, entity, BranchDTO.class).getBody();
-                
-                List<BranchDTO> branchDTOS = new ArrayList<>();
-                branchDTOS.add(branchDTO);
-                response.setData(branchDTOS);
-                response.setMessage(successMessage);
-            }
-            result = response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
+	@Override
+	public Response<BranchDTO> getBranchByCode(DFHeader header, String branchCode) throws Exception {
+		Response<BranchDTO> result;
+		try {
+			Response<BranchDTO> response = new Response<>();
 
-        }
-        return result;
-    }
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			BranchDTO branchDTO = restTemplate
+					.exchange(new URI(branchUrl + "branchCode/" + branchCode), HttpMethod.GET, entity, BranchDTO.class)
+					.getBody();
+
+			List<BranchDTO> branchDTOS = new ArrayList<>();
+			branchDTOS.add(branchDTO);
+			response.setData(branchDTOS);
+			response.setMessage(successMessage);
+
+			result = response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+
+		}
+		return result;
+	}
 
     /**
      * This method will return the branch details based on search criteria such as area, region, branch Type, pin code
@@ -123,27 +123,29 @@ public class BranchServiceImpl implements BranchService {
      * @throws Exception exception
      */
 
-    @Override
-    public Response<BranchDTO> getBranchDetailsByCriteria(DFHeader header, String searchCriteria, String criteriaValue) throws Exception {
-        try {
-            
-            Response<BranchDTO> response = new Response<>();
-            
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                ResponseEntity<List<BranchDTO>> branchDTO = restTemplate.exchange(new URI(branchUrl + searchCriteria + "/" + criteriaValue),
-                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
-                        });
-                
-                response.setData(branchDTO.getBody());
-                response.setMessage(successMessage);
-            }
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
-        }
-    }
+	@Override
+	public Response<BranchDTO> getBranchDetailsByCriteria(DFHeader header, String searchCriteria, String criteriaValue)
+			throws Exception {
+		try {
+
+			Response<BranchDTO> response = new Response<>();
+
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			ResponseEntity<List<BranchDTO>> branchDTO = restTemplate.exchange(
+					new URI(branchUrl + searchCriteria + "/" + criteriaValue), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<BranchDTO>>() {
+					});
+
+			response.setData(branchDTO.getBody());
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+		}
+	}
 
 
     /**
@@ -152,28 +154,27 @@ public class BranchServiceImpl implements BranchService {
      * @param header DFHeader
      * @return Response<BranchDTO>
      */
-    @Override
-    public Response<BranchDTO> getAllBranch(DFHeader header) throws Exception {
-        try {
-            
-            Response<BranchDTO> response = new Response<>();
-           
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
-                ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(new URI(branchUrl),
-                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
-                        });
-                response.setData(branchDTOs.getBody());
-                response.setMessage(successMessage);
-            }
-            
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
+	@Override
+	public Response<BranchDTO> getAllBranch(DFHeader header) throws Exception {
+		try {
 
-        }
-    }
+			Response<BranchDTO> response = new Response<>();
+
+			HttpEntity<String> entity = new HttpEntity<>(BaseUtil.payload(header));
+			ResponseEntity<List<BranchDTO>> branchDTOs = restTemplate.exchange(new URI(branchUrl), HttpMethod.GET,
+					entity, new ParameterizedTypeReference<List<BranchDTO>>() {
+					});
+			response.setData(branchDTOs.getBody());
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+
+		}
+	}
 
     /**
      * This method will return the branch Hierarchy list of default and privilege branch based on parent branch code and isDefault criteria
@@ -183,29 +184,30 @@ public class BranchServiceImpl implements BranchService {
      * @return Response<HierarchyBranchListDTO>
      * @throws Exception exception
      */
-    public Response<HierarchyBranchListDTO> getBranchHierarchyDetails(DFHeader header, List<UserBranchMappingDTO> branchList) throws Exception {
-        try {
-            
-            Response<HierarchyBranchListDTO> response = new Response<>();
-            HttpEntity<List<UserBranchMappingDTO>> entity = new HttpEntity<>(branchList, BaseUtil.payload(header));
-            
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.POST)) {
-                ResponseEntity<HierarchyBranchListDTO> branchHierarchies = restTemplate.exchange(new URI(branchUrl +
-                                "branchHierarchyDetails"),
-                        HttpMethod.POST, entity, new ParameterizedTypeReference<HierarchyBranchListDTO>() {
-                        });
-                
-                List<HierarchyBranchListDTO> hierarchyBranchListDTOS = new ArrayList<>();
-                hierarchyBranchListDTOS.add(branchHierarchies.getBody());
-                response.setData(hierarchyBranchListDTOS);
-                response.setMessage(successMessage);
-            }
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
-        }
-    }
+	public Response<HierarchyBranchListDTO> getBranchHierarchyDetails(DFHeader header,
+			List<UserBranchMappingDTO> branchList) throws Exception {
+		try {
+
+			Response<HierarchyBranchListDTO> response = new Response<>();
+			HttpEntity<List<UserBranchMappingDTO>> entity = new HttpEntity<>(branchList, BaseUtil.payload(header));
+
+			ResponseEntity<HierarchyBranchListDTO> branchHierarchies = restTemplate.exchange(
+					new URI(branchUrl + "branchHierarchyDetails"), HttpMethod.POST, entity,
+					new ParameterizedTypeReference<HierarchyBranchListDTO>() {
+					});
+
+			List<HierarchyBranchListDTO> hierarchyBranchListDTOS = new ArrayList<>();
+			hierarchyBranchListDTOS.add(branchHierarchies.getBody());
+			response.setData(hierarchyBranchListDTOS);
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+		}
+	}
 
     /**
      * This method will return the branches based on wild search on branch name
@@ -214,27 +216,26 @@ public class BranchServiceImpl implements BranchService {
      * @param branchName String
      * @return Response<BranchDTO>
      */
-    public Response<BranchDTO> getBranchByName(DFHeader header, String branchName) throws Exception {
-        try {
-            
-            Response<BranchDTO> response = new Response<>();
-           
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                List<BranchDTO> branchDTOs = restTemplate.exchange(new URI(branchUrl + branchName),
-                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<BranchDTO>>() {
-                        }).getBody();
-                response.setData(branchDTOs);
-                response.setMessage(successMessage);
-            }
-            
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
+	public Response<BranchDTO> getBranchByName(DFHeader header, String branchName) throws Exception {
+		try {
 
-        }
-    }
+			Response<BranchDTO> response = new Response<>();
+
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			List<BranchDTO> branchDTOs = restTemplate.exchange(new URI(branchUrl + branchName), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<BranchDTO>>() {
+					}).getBody();
+			response.setData(branchDTOs);
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+
+		}
+	}
 
     /**
      * This method will fetch all the branch types from repository
@@ -243,26 +244,49 @@ public class BranchServiceImpl implements BranchService {
      * @return Response<String>
      * @throws Exception exception
      */
-    public Response<String> getAllBranchesTypes(DFHeader header) throws Exception {
-        try {
-            
-            Response<String> response = new Response<>();
-            
-            if (CommonBFFUtil.isPermitted(header, branchUri, AuthUtil.permissionTypeEnum.GET)) {
-                HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
-                List<String> branchTypes = restTemplate.exchange(new URI(branchUrl + "types"),
-                        HttpMethod.GET, entity, new ParameterizedTypeReference<List<String>>() {
-                        }).getBody();
-                response.setData(branchTypes);
-                response.setMessage(successMessage);
-            }
-            
-            return response;
-        } catch (RestClientResponseException exception) {
-            JSONObject error = CommonBFFUtil.handleError(exception);
-            throw new ServiceException(error.getString("errorCode"), error.getString("description"), Integer.parseInt(error.getString("status")));
+	public Response<String> getAllBranchesTypes(DFHeader header) throws Exception {
+		try {
 
-        }
+			Response<String> response = new Response<>();
 
-    }
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			List<String> branchTypes = restTemplate.exchange(new URI(branchUrl + "types"), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<String>>() {
+					}).getBody();
+			response.setData(branchTypes);
+			response.setMessage(successMessage);
+
+			return response;
+		} catch (RestClientResponseException exception) {
+			JSONObject error = BFFUtil.handleError(exception);
+			throw new ServiceException(error.getString("errorCode"), error.getString("description"),
+					Integer.parseInt(error.getString("status")));
+		}
+
+	}
+
+	@Override
+	public Response<PincodeDTO> getDetailsByPincode(DFHeader header, String pincode) throws Exception {
+		try {
+			 String geourl = geoUrl + "pincode/" + pincode;
+
+			Response<PincodeDTO> response = new Response<>();
+			HttpEntity<DFHeader> entity = new HttpEntity<>(BaseUtil.payload(header));
+			
+			List<PincodeDTO> pincodeList = restTemplate.exchange(new URI(geourl), HttpMethod.GET, entity,
+					new ParameterizedTypeReference<List<PincodeDTO>>() {}).getBody();
+			
+			response.setData(pincodeList);
+			response.setMessage(successMessage);
+
+			return response;
+
+		} catch (RestClientResponseException exception) {
+			log.error(exception.getMessage());
+			throw exception;
+		}
+		
+
+	}
+
 }

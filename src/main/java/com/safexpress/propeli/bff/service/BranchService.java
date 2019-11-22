@@ -1,12 +1,13 @@
 package com.safexpress.propeli.bff.service;
 
+import java.util.List;
+
 import com.safexpress.propeli.bff.dto.BranchDTO;
 import com.safexpress.propeli.bff.dto.HierarchyBranchListDTO;
+import com.safexpress.propeli.bff.dto.PincodeDTO;
 import com.safexpress.propeli.bff.dto.Response;
 import com.safexpress.propeli.bff.dto.UserBranchMappingDTO;
 import com.safexpress.propeli.servicebase.model.DFHeader;
-
-import java.util.List;
 
 public interface BranchService {
     /**
@@ -27,4 +28,6 @@ public interface BranchService {
     Response<BranchDTO> getBranchByName(DFHeader header, String branchName) throws Exception;
 
     Response<String> getAllBranchesTypes(DFHeader header) throws Exception;
+
+    Response<PincodeDTO> getDetailsByPincode(DFHeader header, String pincode) throws Exception;
 }
