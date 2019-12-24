@@ -1,0 +1,88 @@
+apiVersion: apps/v1   
+kind: Deployment   
+metadata:   
+  name: commonbff   
+  labels:   
+    app: commonbff   
+spec:   
+  replicas: 2   
+  selector:   
+    matchLabels:   
+      app: commonbff   
+  strategy:   
+    rollingUpdate:   
+      maxSurge: 25%   
+      maxUnavailable: 25%   
+    type: RollingUpdate   
+  template:   
+    metadata:   
+      labels:   
+        app: commonbff   
+    spec:   
+      containers:   
+      - image: 183454673550.dkr.ecr.ap-south-1.amazonaws.com/test1:common_bff 
+        imagePullPolicy: Always   
+        name: commonbff   
+        ports:   
+        - containerPort: 80   
+          protocol: TCP   
+      imagePullSecrets:   
+      - name: aws-ecr 
+
+---
+
+apiVersion: v1   
+kind: Service   
+metadata:   
+  name: commonbff  
+  labels:   
+    app: commonbff  
+  annotations:   
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"   
+    prometheus.io/scrape: 'true'   
+    prometheus.io/port:   '80'   
+   
+spec:   
+  type: LoadBalancer   
+  ports:   
+  - protocol: TCP   
+    port: 80   
+  selector:   
+    app: commonbff
+    
+---
+
+apiVersion: networking.istio.io/v1alpha3   
+kind: Gateway   
+metadata:   
+  name: commonbff   
+spec:   
+  selector:   
+    istio: pvt-ingressgateway   
+  servers:   
+  - port:   
+      number: 80 
+      name: http-commonbff  
+      protocol: HTTP   
+    hosts:   
+    - "*"   
+
+---
+
+apiVersion: networking.istio.io/v1alpha3   
+kind: VirtualService   
+metadata:   
+  name: commonbff  
+spec:   
+  hosts:   
+  - "*"   
+  gateways:   
+  - commonbff   
+  http:   
+  - match:   
+    - exact: /commonbff  
+    route:   
+    - destination:   
+        host: commonbff   
+        port:   
+          number: 80 
